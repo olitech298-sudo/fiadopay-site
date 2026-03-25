@@ -138,7 +138,7 @@
       transition: transform .25s;
     }
     .screenshot-card:hover { transform: translateY(-6px); }
-    .screenshot-card img { width: 100%; display: block; }
+    .screenshot-card img { width: 100%; display: block; aspect-ratio: 9/16; object-fit: cover; background: rgba(255,255,255,.06); }
     .screenshot-label {
       padding: 14px 16px;
       font-size: .85rem; font-weight: 700; color: #fff;
@@ -361,15 +361,15 @@
   </div>
   <div class="screenshots-track">
     <div class="screenshot-card">
-      <img src="images/1.png" alt="Painel de controle" loading="lazy" />
+      <img src="images/1.png" alt="Painel de controle" loading="eager" />
       <div class="screenshot-label">Painel de Controle <span>Total a receber e devedores em tempo real</span></div>
     </div>
     <div class="screenshot-card">
-      <img src="images/2.png" alt="Nova venda fiada" loading="lazy" />
+      <img src="images/2.png" alt="Nova venda fiada" loading="eager" />
       <div class="screenshot-label">Nova Venda Fiada <span>Produtos, parcelas e data de vencimento</span></div>
     </div>
     <div class="screenshot-card">
-      <img src="images/3.png" alt="Detalhes do cliente" loading="lazy" />
+      <img src="images/3.png" alt="Detalhes do cliente" loading="eager" />
       <div class="screenshot-label">Detalhes do Cliente <span>Histórico completo, ações rápidas e PDF</span></div>
     </div>
     <div class="screenshot-card">
