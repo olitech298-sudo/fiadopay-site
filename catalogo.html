@@ -200,6 +200,21 @@
     }
     .btn-whatsapp:hover { background: #1ebe5d; }
     .btn-whatsapp svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .btn-ver-todos {
+      display: block;
+      text-align: center;
+      margin: 0 16px 16px;
+      padding: 10px;
+      background: #fff;
+      color: #5B3FB5;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid #c5bde8;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-ver-todos:hover { background: #ede9f7; }
 
     /* ── States ── */
     .state {
@@ -373,9 +388,12 @@
   }
 
   function whatsappLink(p) {
-    const catalogUrl = window.location.href;
+    const base = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    params.set('produto', p.name);
+    const productUrl = `${base}?${params.toString()}`;
     const msg = encodeURIComponent(
-      `Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?\n\nVi no catálogo: ${catalogUrl}`
+      `Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?\n\n${productUrl}`
     );
     return `https://wa.me/${storeWhatsapp}?text=${msg}`;
   }
@@ -440,11 +458,29 @@
       );
 
       allProducts = products;
-      document.getElementById('productCount').textContent =
-        `${products.length} produto${products.length !== 1 ? 's' : ''}`;
 
-      renderFilters(products);
-      applyFilters();
+      const produtoParam = params.get('produto');
+      if (produtoParam) {
+        // modo produto único — esconde busca e filtros
+        document.querySelector('.search-wrap').style.display = 'none';
+        document.getElementById('filters').style.display = 'none';
+        const match = products.filter(p => normalize(p.name) === normalize(produtoParam));
+        document.getElementById('productCount').textContent =
+          match.length ? '1 produto' : 'Produto não encontrado';
+        renderGrid(match);
+        // botão para ver catálogo completo
+        const catalogBase = window.location.origin + window.location.pathname + '?user=' + userId;
+        const btn = document.createElement('a');
+        btn.href = catalogBase;
+        btn.className = 'btn-ver-todos';
+        btn.textContent = '← Ver catálogo completo';
+        document.getElementById('main').after(btn);
+      } else {
+        document.getElementById('productCount').textContent =
+          `${products.length} produto${products.length !== 1 ? 's' : ''}`;
+        renderFilters(products);
+        applyFilters();
+      }
     } catch (e) {
       console.error(e);
       document.getElementById('storeName').textContent = 'Erro';
