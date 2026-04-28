@@ -180,6 +180,26 @@
       color: #4CAF50;
       margin-top: 6px;
     }
+    .btn-whatsapp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px 0;
+      background: #25D366;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-whatsapp:hover { background: #1ebe5d; }
+    .btn-whatsapp svg { width: 15px; height: 15px; flex-shrink: 0; }
 
     /* ── States ── */
     .state {
@@ -269,6 +289,7 @@
 
   let allProducts = [];
   let activeCategory = 'Todos';
+  let storeWhatsapp = null;
 
   async function supabaseGet(path) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers });
@@ -331,6 +352,14 @@
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
+    const waBtn = storeWhatsapp
+      ? `<a class="btn-whatsapp" href="${whatsappLink(p)}" target="_blank" rel="noopener">
+           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+             <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.22-1.57A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.21-1.25-6.22-3.48-8.52ZM12 22c-1.85 0-3.66-.5-5.24-1.44l-.38-.22-3.93.99 1.04-3.82-.24-.39A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10Zm5.47-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.5-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51H6.8c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.12-.27-.2-.57-.34Z"/>
+           </svg>
+           Pedir via WhatsApp
+         </a>`
+      : '';
     return `
       <div class="card">
         ${img}
@@ -338,8 +367,14 @@
           <div class="card-name">${escHtml(p.name)}</div>
           <div>${cat}${unit}</div>
           <div class="card-price">${formatPrice(p.price)}</div>
+          ${waBtn}
         </div>
       </div>`;
+  }
+
+  function whatsappLink(p) {
+    const msg = encodeURIComponent(`Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?`);
+    return `https://wa.me/${storeWhatsapp}?text=${msg}`;
   }
 
   function placeholderSvgInner() {
@@ -382,7 +417,7 @@
     try {
       // Busca configurações do catálogo
       const settings = await supabaseGet(
-        `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name&limit=1`
+        `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name,whatsapp_number&limit=1`
       );
 
       if (!settings.length) {
@@ -392,6 +427,7 @@
       }
 
       const storeName = settings[0].store_name || 'Catálogo';
+      storeWhatsapp = settings[0].whatsapp_number || null;
       document.title = `${storeName} | FiaPay`;
       document.getElementById('storeName').textContent = storeName;
 
