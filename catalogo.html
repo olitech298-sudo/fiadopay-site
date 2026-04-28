@@ -452,23 +452,21 @@
       document.title = `${storeName} | FiaPay`;
       document.getElementById('storeName').textContent = storeName;
 
-      // Busca produtos
-      const products = await supabaseGet(
-        `products?user_id=eq.${userId}&select=name,price,category,image_url,unit&order=name.asc`
-      );
-
-      allProducts = products;
-
       const produtoParam = params.get('produto');
+
       if (produtoParam) {
-        // modo produto único — esconde busca e filtros
+        // modo produto único — busca diretamente no Supabase pelo nome
         document.querySelector('.search-wrap').style.display = 'none';
         document.getElementById('filters').style.display = 'none';
-        const match = products.filter(p => normalize(p.name) === normalize(produtoParam));
+
+        const match = await supabaseGet(
+          `products?user_id=eq.${userId}&name=ilike.${encodeURIComponent(produtoParam)}&select=name,price,category,image_url,unit&limit=1`
+        );
+
         document.getElementById('productCount').textContent =
           match.length ? '1 produto' : 'Produto não encontrado';
         renderGrid(match);
-        // botão para ver catálogo completo
+
         const catalogBase = window.location.origin + window.location.pathname + '?user=' + userId;
         const btn = document.createElement('a');
         btn.href = catalogBase;
@@ -476,6 +474,11 @@
         btn.textContent = '← Ver catálogo completo';
         document.getElementById('main').after(btn);
       } else {
+        // modo catálogo completo
+        const products = await supabaseGet(
+          `products?user_id=eq.${userId}&select=name,price,category,image_url,unit&order=name.asc`
+        );
+        allProducts = products;
         document.getElementById('productCount').textContent =
           `${products.length} produto${products.length !== 1 ? 's' : ''}`;
         renderFilters(products);
