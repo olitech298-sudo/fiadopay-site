@@ -216,6 +216,28 @@
     }
     .btn-ver-todos:hover { background: #ede9f7; }
 
+    /* ── Stock badges ── */
+    .badge-esgotado {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #fee2e2;
+      color: #dc2626;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+    .badge-ultima {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #fff3cd;
+      color: #b45309;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
     /* ── States ── */
     .state {
       display: flex;
@@ -367,6 +389,11 @@
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
+    const stockBadge = p.stock_quantity <= 0
+      ? `<div><span class="badge-esgotado">Esgotado</span></div>`
+      : p.stock_quantity === 1
+        ? `<div><span class="badge-ultima">Última unidade</span></div>`
+        : '';
     const waBtn = storeWhatsapp
       ? `<a class="btn-whatsapp" href="${whatsappLink(p)}" target="_blank" rel="noopener">
            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -382,6 +409,7 @@
           <div class="card-name">${escHtml(p.name)}</div>
           <div>${cat}${unit}</div>
           <div class="card-price">${formatPrice(p.price)}</div>
+          ${stockBadge}
           ${waBtn}
         </div>
       </div>`;
@@ -460,7 +488,7 @@
         document.getElementById('filters').style.display = 'none';
 
         const match = await supabaseGet(
-          `products?user_id=eq.${userId}&name=ilike.${encodeURIComponent(produtoParam)}&select=name,price,category,image_url,unit&limit=1`
+          `products?user_id=eq.${userId}&name=ilike.${encodeURIComponent(produtoParam)}&select=name,price,category,image_url,unit,stock_quantity&limit=1`
         );
 
         document.getElementById('productCount').textContent =
@@ -476,7 +504,7 @@
       } else {
         // modo catálogo completo
         const products = await supabaseGet(
-          `products?user_id=eq.${userId}&select=name,price,category,image_url,unit&order=name.asc`
+          `products?user_id=eq.${userId}&select=name,price,category,image_url,unit,stock_quantity&order=name.asc`
         );
         allProducts = products;
         document.getElementById('productCount').textContent =
