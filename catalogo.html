@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo | FiaPay</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f4f2fb;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #3B2C8A 0%, #5B3FB5 100%);
+      padding: 28px 20px 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(59,44,138,0.3);
+    }
+    .header .brand {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .header .subtitle {
+      margin-top: 6px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* ── Search ── */
+    .search-wrap {
+      max-width: 680px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 12px 18px 12px 44px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(59,44,138,0.08);
+      outline: none;
+      color: #1a1a2e;
+    }
+    .search-wrap {
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #9b8ec4;
+      pointer-events: none;
+    }
+
+    /* ── Category filters ── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 16px 4px;
+      max-width: 680px;
+      margin: 0 auto;
+      scrollbar-width: none;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      white-space: nowrap;
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #c5bde8;
+      background: #fff;
+      color: #5B3FB5;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: linear-gradient(135deg, #3B2C8A, #5B3FB5);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      padding: 16px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(59,44,138,0.08);
+      border: 1.5px solid rgba(91,63,181,0.15);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: default;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(59,44,138,0.15);
+    }
+    .card-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #ede9f7;
+    }
+    .card-img-placeholder {
+      width: 100%;
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #ede9f7, #ddd6f3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-img-placeholder svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.35;
+      color: #5B3FB5;
+    }
+    .card-body {
+      padding: 10px 12px 12px;
+    }
+    .card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-category {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(91,63,181,0.1);
+      color: #5B3FB5;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .card-unit {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #666;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+    .card-price {
+      font-size: 17px;
+      font-weight: 800;
+      color: #4CAF50;
+      margin-top: 6px;
+    }
+
+    /* ── States ── */
+    .state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 260px;
+      gap: 12px;
+      padding: 32px 16px;
+      text-align: center;
+    }
+    .state svg { opacity: 0.3; }
+    .state-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #3B2C8A;
+    }
+    .state-sub {
+      font-size: 14px;
+      color: #888;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 32px 16px 24px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .footer a {
+      color: #5B3FB5;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(91,63,181,0.2);
+      border-top-color: #5B3FB5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 400px) {
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">FiaPay</div>
+  <h1 id="storeName">Carregando...</h1>
+  <div class="subtitle" id="productCount"></div>
+</div>
+
+<div class="search-wrap">
+  <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+  </svg>
+  <input type="text" id="searchInput" placeholder="Pesquisar produto..." oninput="applyFilters()" />
+</div>
+
+<div class="filters" id="filters"></div>
+<div id="main"></div>
+
+<div class="footer">
+  Catálogo gerado com <a href="https://olitech298-sudo.github.io/fiadopay-site/" target="_blank">FiaPay</a>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://apwftgnegplozqsnaybw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwd2Z0Z25lZ3Bsb3pxc25heWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE4MjgsImV4cCI6MjA4NTI5NzgyOH0.VneAxjJ0OmKh0tPbHhjE3bITKgUlYiS6JsugsazP1AI';
+
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  };
+
+  let allProducts = [];
+  let activeCategory = 'Todos';
+
+  async function supabaseGet(path) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  function formatPrice(value) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  }
+
+  function normalize(s) {
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  function applyFilters() {
+    const q = normalize(document.getElementById('searchInput').value);
+    const filtered = allProducts.filter(p => {
+      const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
+      const matchQ = !q || normalize(p.name).includes(q) || normalize(p.category || '').includes(q);
+      return matchCat && matchQ;
+    });
+    renderGrid(filtered);
+  }
+
+  function renderFilters(products) {
+    const cats = ['Todos', ...new Set(products.map(p => p.category).filter(Boolean))];
+    const el = document.getElementById('filters');
+    el.innerHTML = cats.map(c => `
+      <button class="filter-btn ${c === activeCategory ? 'active' : ''}"
+        onclick="setCategory('${c.replace(/'/g, "\\'")}')">${c}</button>
+    `).join('');
+  }
+
+  function setCategory(cat) {
+    activeCategory = cat;
+    renderFilters(allProducts);
+    applyFilters();
+  }
+
+  function renderGrid(products) {
+    const el = document.getElementById('main');
+    if (products.length === 0) {
+      el.innerHTML = `
+        <div class="state">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#5B3FB5" stroke-width="1.5">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+          <div class="state-title">Nenhum produto encontrado</div>
+          <div class="state-sub">Tente outra busca ou categoria.</div>
+        </div>`;
+      return;
+    }
+    el.innerHTML = `<div class="grid">${products.map(cardHtml).join('')}</div>`;
+  }
+
+  function cardHtml(p) {
+    const img = p.image_url
+      ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML=placeholderSvg()">`
+      : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
+    const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
+    const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
+    return `
+      <div class="card">
+        ${img}
+        <div class="card-body">
+          <div class="card-name">${escHtml(p.name)}</div>
+          <div>${cat}${unit}</div>
+          <div class="card-price">${formatPrice(p.price)}</div>
+        </div>
+      </div>`;
+  }
+
+  function placeholderSvgInner() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#5B3FB5" stroke-width="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <path d="M3 9l4-4 4 4 4-4 4 4"/>
+      <circle cx="8.5" cy="13.5" r="1.5"/>
+    </svg>`;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showError(msg) {
+    document.getElementById('main').innerHTML = `
+      <div class="state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#5B3FB5" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <div class="state-title">${msg}</div>
+        <div class="state-sub">Verifique se o link está correto ou peça um novo link ao vendedor.</div>
+      </div>`;
+  }
+
+  async function load() {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('user');
+
+    if (!userId) {
+      document.getElementById('storeName').textContent = 'Link inválido';
+      showError('Parâmetro de usuário ausente.');
+      return;
+    }
+
+    document.getElementById('main').innerHTML = `
+      <div class="state"><div class="spinner"></div><div class="state-sub">Carregando catálogo...</div></div>`;
+
+    try {
+      // Busca configurações do catálogo
+      const settings = await supabaseGet(
+        `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name&limit=1`
+      );
+
+      if (!settings.length) {
+        document.getElementById('storeName').textContent = 'Catálogo indisponível';
+        showError('Este catálogo não está disponível ou foi desativado.');
+        return;
+      }
+
+      const storeName = settings[0].store_name || 'Catálogo';
+      document.title = `${storeName} | FiaPay`;
+      document.getElementById('storeName').textContent = storeName;
+
+      // Busca produtos
+      const products = await supabaseGet(
+        `products?user_id=eq.${userId}&select=name,price,category,image_url,unit&order=name.asc`
+      );
+
+      allProducts = products;
+      document.getElementById('productCount').textContent =
+        `${products.length} produto${products.length !== 1 ? 's' : ''}`;
+
+      renderFilters(products);
+      applyFilters();
+    } catch (e) {
+      console.error(e);
+      document.getElementById('storeName').textContent = 'Erro';
+      showError('Não foi possível carregar o catálogo.');
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
