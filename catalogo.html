@@ -373,7 +373,10 @@
   }
 
   function whatsappLink(p) {
-    const msg = encodeURIComponent(`Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?`);
+    const catalogUrl = window.location.href;
+    const msg = encodeURIComponent(
+      `Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?\n\nVi no catálogo: ${catalogUrl}`
+    );
     return `https://wa.me/${storeWhatsapp}?text=${msg}`;
   }
 
