@@ -504,7 +504,7 @@
       } else {
         // modo catálogo completo
         const products = await supabaseGet(
-          `products?user_id=eq.${userId}&select=name,price,category,image_url,unit,stock_quantity&order=name.asc`
+          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,unit,stock_quantity&order=name.asc`
         );
         allProducts = products;
         document.getElementById('productCount').textContent =
