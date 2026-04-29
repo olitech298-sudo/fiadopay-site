@@ -685,6 +685,7 @@
   let allProducts = [];
   let activeCategory = 'Todos';
   let storeWhatsapp = null;
+  let viewingOrder = false;
 
   // ── Carrinho ──────────────────────────────────────────────
   // cart: Map<name, { name, price, unit, qty }>
@@ -918,7 +919,15 @@
 
     const inCart = cart.has(p.name);
     let actionBtn;
-    if (esgotado) {
+    if (viewingOrder) {
+      const qty = inCart ? cart.get(p.name).qty : 0;
+      actionBtn = `
+        <div class="card-qty-ctrl">
+          <button disabled style="opacity:0.3;cursor:default">−</button>
+          <span>${qty}</span>
+          <button disabled style="opacity:0.3;cursor:default">+</button>
+        </div>`;
+    } else if (esgotado) {
       actionBtn = `<button class="btn-add" disabled>Esgotado</button>`;
     } else if (inCart) {
       const qty = cart.get(p.name).qty;
@@ -1055,6 +1064,7 @@
           });
 
           if (orderedProducts.length > 0) {
+            viewingOrder = true;
             document.querySelector('.search-wrap').style.display = 'none';
             document.getElementById('filters').style.display = 'none';
             document.getElementById('productCount').textContent =
