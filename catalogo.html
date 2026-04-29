@@ -726,7 +726,7 @@
     const count = cartItemCount();
     const fab = document.getElementById('cartFab');
     const badge = document.getElementById('cartBadge');
-    fab.style.display = count > 0 ? 'flex' : 'none';
+    fab.style.display = count > 0 && !viewingOrder ? 'flex' : 'none';
     badge.textContent = count;
     renderCartDrawer();
   }
