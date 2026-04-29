@@ -12,6 +12,7 @@
       background: #f4f2fb;
       color: #1a1a2e;
       min-height: 100vh;
+      padding-bottom: 100px;
     }
 
     /* ── Header ── */
@@ -45,6 +46,7 @@
       max-width: 680px;
       margin: 24px auto 0;
       padding: 0 16px;
+      position: relative;
     }
     .search-wrap input {
       width: 100%;
@@ -56,9 +58,6 @@
       box-shadow: 0 2px 12px rgba(59,44,138,0.08);
       outline: none;
       color: #1a1a2e;
-    }
-    .search-wrap {
-      position: relative;
     }
     .search-icon {
       position: absolute;
@@ -180,7 +179,9 @@
       color: #4CAF50;
       margin-top: 6px;
     }
-    .btn-whatsapp {
+
+    /* ── Botão adicionar ao carrinho ── */
+    .btn-add {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -188,33 +189,50 @@
       width: 100%;
       margin-top: 10px;
       padding: 8px 0;
-      background: #25D366;
+      background: linear-gradient(135deg, #3B2C8A, #5B3FB5);
       color: #fff;
       font-size: 12px;
       font-weight: 700;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s;
+      transition: opacity 0.15s;
     }
-    .btn-whatsapp:hover { background: #1ebe5d; }
-    .btn-whatsapp svg { width: 15px; height: 15px; flex-shrink: 0; }
-    .btn-ver-todos {
-      display: block;
-      text-align: center;
-      margin: 0 16px 16px;
-      padding: 10px;
-      background: #fff;
+    .btn-add:hover { opacity: 0.88; }
+    .btn-add:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .btn-add svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* Controles de quantidade no card */
+    .card-qty-ctrl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      background: rgba(91,63,181,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card-qty-ctrl button {
+      width: 36px;
+      height: 34px;
+      border: none;
+      background: transparent;
       color: #5B3FB5;
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 700;
-      border: 1.5px solid #c5bde8;
-      border-radius: 12px;
-      text-decoration: none;
+      cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-ver-todos:hover { background: #ede9f7; }
+    .card-qty-ctrl button:hover { background: rgba(91,63,181,0.15); }
+    .card-qty-ctrl span {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3B2C8A;
+    }
 
     /* ── Stock badges ── */
     .badge-esgotado {
@@ -237,6 +255,256 @@
       font-weight: 700;
       margin-top: 5px;
     }
+
+    /* ── Botão flutuante do carrinho ── */
+    .cart-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B2C8A, #5B3FB5);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(59,44,138,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 100;
+    }
+    .cart-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 32px rgba(59,44,138,0.5);
+    }
+    .cart-fab svg { width: 26px; height: 26px; }
+    .cart-fab-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #e53935;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #f4f2fb;
+    }
+
+    /* ── Modal do carrinho ── */
+    .cart-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .cart-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .cart-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 85vh;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .cart-drawer.open { transform: translateY(0); }
+    .cart-handle {
+      width: 40px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+    .cart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #f0eef8;
+      flex-shrink: 0;
+    }
+    .cart-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a1a2e;
+    }
+    .cart-header-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+    }
+    .cart-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #f4f2fb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5B3FB5;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .cart-items {
+      overflow-y: auto;
+      flex: 1;
+      padding: 12px 20px;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0eef8;
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cart-item-unit-price {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .cart-item-subtotal {
+      font-size: 14px;
+      font-weight: 800;
+      color: #4CAF50;
+      white-space: nowrap;
+    }
+    .cart-item-qty {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #f4f2fb;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .cart-item-qty button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: #5B3FB5;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-item-qty button:hover { background: rgba(91,63,181,0.15); }
+    .cart-item-qty span {
+      width: 28px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #3B2C8A;
+    }
+
+    /* Carrinho vazio */
+    .cart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
+      gap: 12px;
+      color: #bbb;
+    }
+    .cart-empty svg { opacity: 0.3; }
+    .cart-empty p {
+      font-size: 15px;
+      font-weight: 600;
+      color: #aaa;
+    }
+
+    /* Footer do carrinho */
+    .cart-footer {
+      padding: 16px 20px 28px;
+      border-top: 1px solid #f0eef8;
+      flex-shrink: 0;
+    }
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cart-total-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .cart-total-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #3B2C8A;
+    }
+    .btn-checkout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px;
+      background: #25D366;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+    .btn-checkout:hover { background: #1ebe5d; }
+    .btn-checkout svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .btn-continue {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: #5B3FB5;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1.5px solid #c5bde8;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-continue:hover { background: #f4f2fb; }
 
     /* ── States ── */
     .state {
@@ -275,6 +543,21 @@
       font-weight: 600;
     }
     .footer a:hover { text-decoration: underline; }
+    .btn-ver-todos {
+      display: block;
+      text-align: center;
+      margin: 0 16px 16px;
+      padding: 10px;
+      background: #fff;
+      color: #5B3FB5;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid #c5bde8;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-ver-todos:hover { background: #ede9f7; }
 
     /* ── Spinner ── */
     .spinner {
@@ -314,6 +597,30 @@
   Catálogo gerado com <a href="https://olitech298-sudo.github.io/fiadopay-site/" target="_blank">FiaPay</a>
 </div>
 
+<!-- Botão flutuante do carrinho -->
+<button class="cart-fab" id="cartFab" onclick="openCart()" style="display:none" aria-label="Ver carrinho">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+  </svg>
+  <span class="cart-fab-badge" id="cartBadge">0</span>
+</button>
+
+<!-- Overlay e Drawer do carrinho -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-handle"></div>
+  <div class="cart-header">
+    <div>
+      <h2>Meu pedido</h2>
+      <span class="cart-header-count" id="cartHeaderCount"></span>
+    </div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter"></div>
+</div>
+
 <script>
   const SUPABASE_URL = 'https://apwftgnegplozqsnaybw.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwd2Z0Z25lZ3Bsb3pxc25heWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE4MjgsImV4cCI6MjA4NTI5NzgyOH0.VneAxjJ0OmKh0tPbHhjE3bITKgUlYiS6JsugsazP1AI';
@@ -327,6 +634,133 @@
   let allProducts = [];
   let activeCategory = 'Todos';
   let storeWhatsapp = null;
+
+  // ── Carrinho ──────────────────────────────────────────────
+  // cart: Map<name, { name, price, unit, qty }>
+  const cart = new Map();
+
+  function cartTotal() {
+    let t = 0;
+    cart.forEach(i => t += i.price * i.qty);
+    return t;
+  }
+
+  function cartItemCount() {
+    let n = 0;
+    cart.forEach(i => n += i.qty);
+    return n;
+  }
+
+  function addToCart(name, price, unit) {
+    if (cart.has(name)) {
+      cart.get(name).qty++;
+    } else {
+      cart.set(name, { name, price, unit, qty: 1 });
+    }
+    syncCartUI();
+    applyFilters(); // atualiza botões nos cards
+  }
+
+  function changeQty(name, delta) {
+    if (!cart.has(name)) return;
+    const item = cart.get(name);
+    item.qty += delta;
+    if (item.qty <= 0) cart.delete(name);
+    syncCartUI();
+    applyFilters();
+  }
+
+  function syncCartUI() {
+    const count = cartItemCount();
+    const fab = document.getElementById('cartFab');
+    const badge = document.getElementById('cartBadge');
+    fab.style.display = count > 0 ? 'flex' : 'none';
+    badge.textContent = count;
+    renderCartDrawer();
+  }
+
+  function renderCartDrawer() {
+    const itemsEl = document.getElementById('cartItems');
+    const footerEl = document.getElementById('cartFooter');
+    const countEl = document.getElementById('cartHeaderCount');
+    const count = cartItemCount();
+
+    countEl.textContent = count > 0 ? `${count} ${count === 1 ? 'item' : 'itens'}` : '';
+
+    if (cart.size === 0) {
+      itemsEl.innerHTML = `
+        <div class="cart-empty">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#5B3FB5" stroke-width="1.5">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <p>Nenhum item adicionado</p>
+        </div>`;
+      footerEl.innerHTML = `
+        <button class="btn-continue" onclick="closeCart()">← Voltar ao catálogo</button>`;
+      return;
+    }
+
+    let html = '';
+    cart.forEach(item => {
+      html += `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${escHtml(item.name)}</div>
+            <div class="cart-item-unit-price">${formatPrice(item.price)} / ${escHtml(item.unit || 'un')}</div>
+          </div>
+          <div class="cart-item-qty">
+            <button onclick="changeQty('${escAttr(item.name)}', -1)">−</button>
+            <span>${item.qty}</span>
+            <button onclick="changeQty('${escAttr(item.name)}', 1)">+</button>
+          </div>
+          <div class="cart-item-subtotal">${formatPrice(item.price * item.qty)}</div>
+        </div>`;
+    });
+    itemsEl.innerHTML = html;
+
+    const total = cartTotal();
+    const waHref = storeWhatsapp ? buildOrderWhatsappLink() : null;
+    footerEl.innerHTML = `
+      <div class="cart-total-row">
+        <span class="cart-total-label">Total</span>
+        <span class="cart-total-value">${formatPrice(total)}</span>
+      </div>
+      ${waHref
+        ? `<a class="btn-checkout" href="${waHref}" target="_blank" rel="noopener">
+             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.22-1.57A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.21-1.25-6.22-3.48-8.52ZM12 22c-1.85 0-3.66-.5-5.24-1.44l-.38-.22-3.93.99 1.04-3.82-.24-.39A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10Zm5.47-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.5-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51H6.8c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.12-.27-.2-.57-.34Z"/></svg>
+             Enviar pedido via WhatsApp
+           </a>`
+        : `<p style="text-align:center;font-size:13px;color:#aaa;margin-bottom:10px;">
+             Sem número de WhatsApp configurado pelo vendedor.
+           </p>`
+      }
+      <button class="btn-continue" onclick="closeCart()">← Continuar comprando</button>`;
+  }
+
+  function buildOrderWhatsappLink() {
+    let lines = 'Olá! Gostaria de fazer um pedido:\n\n';
+    cart.forEach(item => {
+      lines += `• ${item.qty}x ${item.name} — ${formatPrice(item.price * item.qty)}\n`;
+    });
+    lines += `\n*Total: ${formatPrice(cartTotal())}*`;
+    const catalogUrl = window.location.href.split('?')[0] + window.location.search.replace(/&produto=[^&]*/,'');
+    lines += `\n\n${catalogUrl}`;
+    return `https://wa.me/${storeWhatsapp}?text=${encodeURIComponent(lines)}`;
+  }
+
+  function openCart() {
+    document.getElementById('cartOverlay').classList.add('open');
+    document.getElementById('cartDrawer').classList.add('open');
+    renderCartDrawer();
+  }
+
+  function closeCart() {
+    document.getElementById('cartOverlay').classList.remove('open');
+    document.getElementById('cartDrawer').classList.remove('open');
+  }
+
+  // ── Catálogo ─────────────────────────────────────────────
 
   async function supabaseGet(path) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers });
@@ -385,23 +819,40 @@
 
   function cardHtml(p) {
     const img = p.image_url
-      ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML=placeholderSvg()">`
+      ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML=placeholderSvgInner()">`
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
-    const stockBadge = p.stock_quantity <= 0
+    const esgotado = p.stock_quantity <= 0;
+    const stockBadge = esgotado
       ? `<div><span class="badge-esgotado">Esgotado</span></div>`
       : p.stock_quantity === 1
         ? `<div><span class="badge-ultima">Última unidade</span></div>`
         : '';
-    const waBtn = storeWhatsapp
-      ? `<a class="btn-whatsapp" href="${whatsappLink(p)}" target="_blank" rel="noopener">
-           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-             <path d="M20.52 3.48A11.93 11.93 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.55 4.16 1.6 5.97L0 24l6.22-1.57A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.21-1.25-6.22-3.48-8.52ZM12 22c-1.85 0-3.66-.5-5.24-1.44l-.38-.22-3.93.99 1.04-3.82-.24-.39A9.94 9.94 0 0 1 2 12C2 6.48 6.48 2 12 2c2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10-10 10Zm5.47-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.5-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51H6.8c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.12-.27-.2-.57-.34Z"/>
-           </svg>
-           Pedir via WhatsApp
-         </a>`
-      : '';
+
+    const inCart = cart.has(p.name);
+    let actionBtn;
+    if (esgotado) {
+      actionBtn = `<button class="btn-add" disabled>Esgotado</button>`;
+    } else if (inCart) {
+      const qty = cart.get(p.name).qty;
+      actionBtn = `
+        <div class="card-qty-ctrl">
+          <button onclick="changeQty('${escAttr(p.name)}', -1)">−</button>
+          <span>${qty}</span>
+          <button onclick="changeQty('${escAttr(p.name)}', 1)">+</button>
+        </div>`;
+    } else {
+      actionBtn = `
+        <button class="btn-add" onclick="addToCart('${escAttr(p.name)}', ${p.price}, '${escAttr(p.unit || 'un')}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          Adicionar
+        </button>`;
+    }
+
     return `
       <div class="card">
         ${img}
@@ -410,20 +861,9 @@
           <div>${cat}${unit}</div>
           <div class="card-price">${formatPrice(p.price)}</div>
           ${stockBadge}
-          ${waBtn}
+          ${actionBtn}
         </div>
       </div>`;
-  }
-
-  function whatsappLink(p) {
-    const base = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-    params.set('produto', p.name);
-    const productUrl = `${base}?${params.toString()}`;
-    const msg = encodeURIComponent(
-      `Olá! Tenho interesse no produto *${p.name}* por ${formatPrice(p.price)}. Ainda tem disponível?\n\n${productUrl}`
-    );
-    return `https://wa.me/${storeWhatsapp}?text=${msg}`;
   }
 
   function placeholderSvgInner() {
@@ -436,6 +876,10 @@
 
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function escAttr(s) {
+    return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   }
 
   function showError(msg) {
@@ -464,7 +908,6 @@
       <div class="state"><div class="spinner"></div><div class="state-sub">Carregando catálogo...</div></div>`;
 
     try {
-      // Busca configurações do catálogo
       const settings = await supabaseGet(
         `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name,whatsapp_number&limit=1`
       );
@@ -483,7 +926,6 @@
       const produtoParam = params.get('produto');
 
       if (produtoParam) {
-        // modo produto único — busca diretamente no Supabase pelo nome
         document.querySelector('.search-wrap').style.display = 'none';
         document.getElementById('filters').style.display = 'none';
 
@@ -502,7 +944,6 @@
         btn.textContent = '← Ver catálogo completo';
         document.getElementById('main').after(btn);
       } else {
-        // modo catálogo completo
         const products = await supabaseGet(
           `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,unit,stock_quantity&order=name.asc`
         );
