@@ -559,6 +559,43 @@
     }
     .btn-ver-todos:hover { background: #ede9f7; }
 
+    /* ── Image Modal ── */
+    .img-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .img-modal-overlay.open { display: flex; }
+    .img-modal-overlay img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 16px;
+      object-fit: contain;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .img-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-img { cursor: zoom-in; }
+
     /* ── Resumo do Pedido ── */
     .pedido-banner {
       max-width: 680px;
@@ -659,6 +696,11 @@
 
 <!-- Overlay e Drawer do carrinho -->
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+<div class="img-modal-overlay" id="imgModal" onclick="closeImgModal()">
+  <button class="img-modal-close" onclick="closeImgModal()">✕</button>
+  <img id="imgModalImg" src="" alt="" onclick="event.stopPropagation()">
+</div>
 <div class="cart-drawer" id="cartDrawer">
   <div class="cart-handle"></div>
   <div class="cart-header">
@@ -904,9 +946,23 @@
     el.innerHTML = `<div class="grid">${products.map(cardHtml).join('')}</div>`;
   }
 
+  function openImgModal(src, alt) {
+    const modal = document.getElementById('imgModal');
+    const img = document.getElementById('imgModalImg');
+    img.src = src;
+    img.alt = alt;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeImgModal() {
+    document.getElementById('imgModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
   function cardHtml(p) {
     const img = p.image_url
-      ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML=placeholderSvgInner()">`
+      ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onclick="openImgModal('${escAttr(p.image_url)}','${escAttr(p.name)}')" onerror="this.parentNode.innerHTML=placeholderSvgInner()">`
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
