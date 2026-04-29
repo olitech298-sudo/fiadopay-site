@@ -559,6 +559,36 @@
     }
     .btn-ver-todos:hover { background: #ede9f7; }
 
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #3B2C8A;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 2000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .qty-limit-msg {
+      font-size: 11px;
+      color: #e05252;
+      font-weight: 600;
+      margin-top: 4px;
+      text-align: center;
+    }
+
     /* ── Image Modal ── */
     .img-modal-overlay {
       display: none;
@@ -695,6 +725,7 @@
 </button>
 
 <!-- Overlay e Drawer do carrinho -->
+<div class="toast" id="toast"></div>
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
 <div class="img-modal-overlay" id="imgModal" onclick="closeImgModal()">
@@ -756,10 +787,22 @@
     applyFilters();
   }
 
+  let toastTimer = null;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
   function changeQty(name, delta) {
     if (!cart.has(name)) return;
     const item = cart.get(name);
-    if (delta > 0 && item.qty >= item.stock) return;
+    if (delta > 0 && item.qty >= item.stock) {
+      showToast(`Limite do estoque atingido (${item.stock} disponível)`);
+      return;
+    }
     item.qty += delta;
     if (item.qty <= 0) cart.delete(name);
     syncCartUI();
@@ -995,7 +1038,8 @@
           <button onclick="changeQty('${escAttr(p.name)}', -1)">−</button>
           <span>${qty}</span>
           <button onclick="changeQty('${escAttr(p.name)}', 1)" ${atMax ? 'disabled style="opacity:0.3;cursor:default"' : ''}>+</button>
-        </div>`;
+        </div>
+        ${atMax ? `<div class="qty-limit-msg">Limite do estoque atingido</div>` : ''}`;
     } else {
       actionBtn = `
         <button class="btn-add" onclick="addToCart('${escAttr(p.name)}', ${p.price}, '${escAttr(p.unit || 'un')}', ${p.stock_quantity})">
