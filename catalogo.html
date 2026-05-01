@@ -234,6 +234,13 @@
       color: #3B2C8A;
     }
 
+    /* ── Contagem de estoque ── */
+    .card-stock-count {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
     /* ── Stock badges ── */
     .badge-esgotado {
       display: inline-block;
@@ -589,6 +596,255 @@
       text-align: center;
     }
 
+    /* ── Variantes inline no card ── */
+    .card-variants { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
+    .card-variant-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #9b8ec4;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1px;
+    }
+    .card-variant-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .chip-sm {
+      padding: 3px 9px;
+      border-radius: 8px;
+      border: 1.5px solid #d1d5db;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.5;
+    }
+    .chip-sm:hover { border-color: #5c3fb5; color: #5c3fb5; }
+    .chip-sm-active {
+      border-color: #5c3fb5;
+      background: rgba(92,63,181,0.12);
+      color: #5c3fb5;
+    }
+    .swatch-sm {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.12);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .swatch-sm:hover { transform: scale(1.2); border-color: #5c3fb5; }
+    .swatch-sm-active {
+      border-color: #5c3fb5 !important;
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #5c3fb5;
+      transform: scale(1.15);
+    }
+    .chip-sm-esgotado {
+      opacity: 0.45;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    .swatch-sm-esgotado { cursor: not-allowed; }
+    .variant-hint {
+      font-size: 10px;
+      color: #b094e0;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* ── Variant Modal ── */
+    .variant-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .variant-overlay.open { display: flex; }
+    .variant-sheet {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 480px;
+      max-height: 92vh;
+      overflow-y: auto;
+      animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
+      position: relative;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .variant-product-img-wrap {
+      width: 100%;
+      position: relative;
+      border-radius: 24px 24px 0 0;
+      overflow: hidden;
+      background: #ede9f7;
+    }
+    .variant-product-img-wrap img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      display: block;
+    }
+    .variant-product-img-placeholder {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #ede9f7, #ddd6f3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .variant-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.92);
+      color: #333;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      z-index: 20;
+      line-height: 1;
+    }
+    .variant-body { padding: 20px 20px 36px; }
+    .variant-handle {
+      width: 40px; height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .variant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .variant-product-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+      flex: 1;
+      line-height: 1.3;
+    }
+    .variant-product-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: #4CAF50;
+      white-space: nowrap;
+    }
+    .variant-section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .variant-selected-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5c3fb5;
+    }
+    .variant-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .variant-chip {
+      padding: 9px 20px;
+      border-radius: 10px;
+      border: 2px solid #d1d5db;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-width: 48px;
+      text-align: center;
+    }
+    .variant-chip:hover:not(.esgotado) { border-color: #5c3fb5; color: #5c3fb5; }
+    .variant-chip.selected { border-color: #5c3fb5; background: #5c3fb5; color: #fff; }
+    .variant-chip.esgotado { opacity: 0.38; cursor: not-allowed; text-decoration: line-through; background: #f5f5f5; }
+    /* Color swatches */
+    .variant-color-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .variant-color-swatch-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .variant-color-swatch-btn:hover:not(.esgotado) { background: rgba(91,63,181,0.08); }
+    .variant-color-swatch-btn.esgotado { opacity: 0.38; cursor: not-allowed; }
+    .variant-color-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(0,0,0,0.1);
+      transition: all 0.15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.14);
+    }
+    .variant-color-swatch-btn.selected .variant-color-circle {
+      border-color: #5c3fb5;
+      box-shadow: 0 0 0 2.5px #fff, 0 0 0 5px #5c3fb5;
+      transform: scale(1.1);
+    }
+    .variant-color-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+      max-width: 52px;
+      text-align: center;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .variant-color-swatch-btn.selected .variant-color-name { color: #5c3fb5; }
+    .variant-stock-info { font-size: 12px; color: #999; margin-bottom: 14px; min-height: 16px; }
+    .btn-variant-confirm {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #3B2C8A, #5B3FB5);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-variant-confirm:disabled { opacity: 0.4; cursor: default; }
+    /* Cart count badge on variant cards */
+    .variant-in-cart-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #5c3fb5;
+      margin-bottom: 6px;
+    }
+
     /* ── Image Modal ── */
     .img-modal-overlay {
       display: none;
@@ -925,6 +1181,24 @@
 <div class="toast" id="toast"></div>
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
+<div class="variant-overlay" id="variantModal" onclick="closeVariantModal(event)">
+  <div class="variant-sheet" onclick="event.stopPropagation()">
+    <button class="variant-close" onclick="closeVariantModalDirect()">✕</button>
+    <div id="variantProductImg" class="variant-product-img-wrap"></div>
+    <div class="variant-body">
+      <div class="variant-handle"></div>
+      <div class="variant-header">
+        <div class="variant-product-name" id="variantProductName"></div>
+        <div class="variant-product-price" id="variantProductPrice"></div>
+      </div>
+      <div id="variantSizesSection"></div>
+      <div id="variantColorsSection"></div>
+      <div class="variant-stock-info" id="variantStockInfo"></div>
+      <button class="btn-variant-confirm" id="variantConfirmBtn" onclick="confirmVariant()">Adicionar ao carrinho</button>
+    </div>
+  </div>
+</div>
+
 <div class="img-modal-overlay" id="imgModal" onclick="closeImgModal()">
   <button class="img-modal-close" onclick="closeImgModal()">✕</button>
   <img id="imgModalImg" src="" alt="" onclick="event.stopPropagation()">
@@ -958,6 +1232,35 @@
   let viewingOrder = false;
   let storeUserId = null;
 
+  function getColorCss(name) {
+    const map = {
+      'preto': '#1a1a1a', 'negro': '#1a1a1a', 'black': '#1a1a1a',
+      'branco': '#f0f0f0', 'white': '#f0f0f0',
+      'cinza': '#9e9e9e', 'gray': '#9e9e9e', 'grey': '#9e9e9e',
+      'cinza claro': '#e0e0e0', 'cinza escuro': '#616161',
+      'azul': '#1565C0', 'blue': '#1565C0',
+      'azul marinho': '#0D2137', 'marinho': '#0D2137',
+      'azul royal': '#1a3a8f', 'royal': '#1a3a8f',
+      'azul claro': '#42a5f5', 'celeste': '#42a5f5',
+      'vermelho': '#c62828', 'red': '#c62828',
+      'verde': '#2e7d32', 'green': '#2e7d32',
+      'verde claro': '#66bb6a', 'verde militar': '#4e6c44',
+      'amarelo': '#f9a825', 'yellow': '#f9a825',
+      'laranja': '#e65100', 'orange': '#e65100',
+      'rosa': '#e91e63', 'pink': '#e91e63', 'rosa claro': '#f48fb1',
+      'roxo': '#6a1b9a', 'purple': '#6a1b9a',
+      'lilás': '#9c27b0', 'lilas': '#9c27b0',
+      'vinho': '#6d1919', 'bordô': '#6d1919', 'bordo': '#6d1919',
+      'marrom': '#5d4037', 'brown': '#5d4037', 'café': '#5d4037', 'cafe': '#5d4037',
+      'bege': '#d7c5a6', 'beige': '#d7c5a6',
+      'caramelo': '#a0522d',
+      'dourado': '#d4a017', 'gold': '#d4a017', 'ouro': '#d4a017',
+      'prata': '#b0bec5', 'silver': '#b0bec5',
+      'creme': '#fff8e1',
+    };
+    return map[name.toLowerCase().trim()] || null;
+  }
+
   // ── Carrinho ──────────────────────────────────────────────
   // cart: Map<name, { name, price, unit, qty }>
   const cart = new Map();
@@ -974,12 +1277,13 @@
     return n;
   }
 
-  function addToCart(name, price, unit, stock) {
-    if (cart.has(name)) {
-      const item = cart.get(name);
+  function addToCart(name, price, unit, stock, size = '', color = '') {
+    const key = `${name}||${size}||${color}`;
+    if (cart.has(key)) {
+      const item = cart.get(key);
       if (item.qty < item.stock) item.qty++;
     } else {
-      cart.set(name, { name, price, unit, stock, qty: 1 });
+      cart.set(key, { key, name, price, unit, stock, qty: 1, size, color });
     }
     syncCartUI();
     applyFilters();
@@ -994,15 +1298,15 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
   }
 
-  function changeQty(name, delta) {
-    if (!cart.has(name)) return;
-    const item = cart.get(name);
+  function changeQty(key, delta) {
+    if (!cart.has(key)) return;
+    const item = cart.get(key);
     if (delta > 0 && item.qty >= item.stock) {
       showToast(`Limite do estoque atingido (${item.stock} disponível)`);
       return;
     }
     item.qty += delta;
-    if (item.qty <= 0) cart.delete(name);
+    if (item.qty <= 0) cart.delete(key);
     syncCartUI();
     applyFilters();
   }
@@ -1040,16 +1344,18 @@
 
     let html = '';
     cart.forEach(item => {
+      const variantParts = [item.size, item.color].filter(Boolean);
+      const variantLabel = variantParts.length ? ` <span style="font-size:11px;color:#7c3aed;font-weight:600">(${escHtml(variantParts.join(' / '))})</span>` : '';
       html += `
         <div class="cart-item">
           <div class="cart-item-info">
-            <div class="cart-item-name">${escHtml(item.name)}</div>
+            <div class="cart-item-name">${escHtml(item.name)}${variantLabel}</div>
             <div class="cart-item-unit-price">${formatPrice(item.price)} / ${escHtml(item.unit || 'un')}</div>
           </div>
           <div class="cart-item-qty">
-            <button onclick="changeQty('${escAttr(item.name)}', -1)">−</button>
+            <button onclick="changeQty('${escAttr(item.key)}', -1)">−</button>
             <span>${item.qty}</span>
-            <button onclick="changeQty('${escAttr(item.name)}', 1)">+</button>
+            <button onclick="changeQty('${escAttr(item.key)}', 1)">+</button>
           </div>
           <div class="cart-item-subtotal">${formatPrice(item.price * item.qty)}</div>
         </div>`;
@@ -1213,9 +1519,8 @@
 
     try {
       // Re-busca preços diretamente do banco para evitar manipulação
-      const nameFilters = Array.from(cart.keys())
-        .map(n => `name.eq.${encodeURIComponent(n)}`)
-        .join(',');
+      const uniqueNames = [...new Set([...cart.values()].map(i => i.name))];
+      const nameFilters = uniqueNames.map(n => `name.eq.${encodeURIComponent(n)}`).join(',');
       const freshProducts = await supabaseGet(
         `products?user_id=eq.${storeUserId}&or=(${nameFilters})&catalog_visible=eq.true&select=name,price`
       );
@@ -1228,7 +1533,9 @@
         const freshPrice = priceMap.get(item.name);
         if (freshPrice == null) return; // produto removido do catálogo — ignora
         amount += freshPrice * item.qty;
-        descParts.push(`${item.qty}x ${item.name}`);
+        const variantParts = [item.size, item.color].filter(Boolean);
+        const displayName = variantParts.length ? `${item.name} (${variantParts.join(' / ')})` : item.name;
+        descParts.push(`${item.qty}x ${displayName}`);
       });
 
       if (descParts.length === 0) {
@@ -1256,9 +1563,11 @@
         descParts.forEach(desc => {
           const parts = desc.match(/^(\d+)x (.+)$/);
           if (!parts) return;
-          const [, qty, pName] = parts;
-          const fp = priceMap.get(pName) ?? 0;
-          waLines += `• ${qty}x ${pName} — ${formatPrice(parseFloat(fp) * parseInt(qty))}\n`;
+          const [, qty, label] = parts;
+          // Extrai nome base sem a variante entre parênteses ex: "Camiseta (M / Azul)" → "Camiseta"
+          const baseName = label.replace(/ \([^)]+\)$/, '');
+          const fp = priceMap.get(baseName) ?? 0;
+          waLines += `• ${qty}x ${label} — ${formatPrice(parseFloat(fp) * parseInt(qty))}\n`;
         });
         waLines += `\n*Total: ${formatPrice(amount)}*`;
         waLines += `\n\nNome: ${name}\nTelefone: ${phone}`;
@@ -1357,6 +1666,151 @@
     document.body.style.overflow = '';
   }
 
+  let _variantProduct = null;
+  let _variantSelectedSize = null;
+  let _variantSelectedColor = null;
+
+  function openVariantByName(name) {
+    const p = allProducts.find(prod => prod.name === name);
+    if (p) openVariantModal(p);
+  }
+
+  function openVariantModal(p) {
+    _variantProduct = p;
+    const hasSizes  = p.variants && p.variants.sizes  && p.variants.sizes.length  > 0;
+    const hasColors = p.variants && p.variants.colors && p.variants.colors.length > 0;
+    _variantSelectedSize  = hasSizes  ? null : '';
+    _variantSelectedColor = hasColors ? null : '';
+
+    // Imagem do produto
+    const imgWrap = document.getElementById('variantProductImg');
+    if (p.image_url) {
+      imgWrap.innerHTML = `<img src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}">`;
+      imgWrap.style.display = '';
+    } else {
+      imgWrap.innerHTML = `<div class="variant-product-img-placeholder">${placeholderSvgInner()}</div>`;
+      imgWrap.style.display = '';
+    }
+
+    document.getElementById('variantProductName').textContent = p.name;
+    document.getElementById('variantProductPrice').textContent = formatPrice(p.price);
+    document.getElementById('variantStockInfo').textContent = '';
+
+    // helper: variant stock
+    const vs = p.variant_stock || {};
+    const hasVS = Object.keys(vs).length > 0;
+    const getVS = (sz, cl) => hasVS ? (vs[`${sz||''}||${cl||''}`] ?? 0) : p.stock_quantity;
+    const sizeOk = sz => hasVS
+      ? (hasColors ? p.variants.colors.some(c => getVS(sz,c) > 0) : getVS(sz,'') > 0)
+      : p.stock_quantity > 0;
+    const colorOk = cl => hasVS
+      ? (hasSizes ? p.variants.sizes.some(s => getVS(s,cl) > 0) : getVS('',cl) > 0)
+      : p.stock_quantity > 0;
+
+    const sizesSection = document.getElementById('variantSizesSection');
+    if (hasSizes) {
+      sizesSection.innerHTML = `
+        <div class="variant-section-label">Tamanho <span class="variant-selected-tag" id="selectedSizeTag"></span></div>
+        <div class="variant-chips">
+          ${p.variants.sizes.map(s => {
+            const avail = sizeOk(s);
+            return `<button class="variant-chip${avail ? '' : ' esgotado'}"
+              onclick="${avail ? `selectVariantSize('${escAttr(s)}')` : 'void 0'}"
+              title="${avail ? '' : 'Esgotado'}">${escHtml(s)}</button>`;
+          }).join('')}
+        </div>`;
+    } else {
+      sizesSection.innerHTML = '';
+    }
+
+    const colorsSection = document.getElementById('variantColorsSection');
+    if (hasColors) {
+      const colorItems = p.variants.colors.map(c => {
+        const avail = colorOk(c);
+        const css = getColorCss(c);
+        if (css) {
+          return `<button class="variant-color-swatch-btn${avail ? '' : ' esgotado'}"
+            onclick="${avail ? `selectVariantColor('${escAttr(c)}')` : 'void 0'}"
+            data-color="${escAttr(c)}" title="${escHtml(c)}${avail ? '' : ' (esgotado)'}">
+            <div class="variant-color-circle" style="background:${css}"></div>
+            <span class="variant-color-name">${escHtml(c)}</span>
+          </button>`;
+        }
+        return `<button class="variant-chip${avail ? '' : ' esgotado'}"
+          onclick="${avail ? `selectVariantColor('${escAttr(c)}')` : 'void 0'}">${escHtml(c)}</button>`;
+      }).join('');
+      colorsSection.innerHTML = `
+        <div class="variant-section-label">Cor <span class="variant-selected-tag" id="selectedColorTag"></span></div>
+        <div class="variant-color-grid">${colorItems}</div>`;
+    } else {
+      colorsSection.innerHTML = '';
+    }
+
+    _updateVariantConfirmBtn();
+    document.getElementById('variantModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function selectVariantSize(size) {
+    _variantSelectedSize = size;
+    document.querySelectorAll('#variantSizesSection .variant-chip').forEach(btn => {
+      btn.classList.toggle('selected', btn.textContent.trim() === size);
+    });
+    const tag = document.getElementById('selectedSizeTag');
+    if (tag) tag.textContent = size;
+    _updateVariantConfirmBtn();
+  }
+
+  function selectVariantColor(color) {
+    _variantSelectedColor = color;
+    document.querySelectorAll('#variantColorsSection .variant-color-swatch-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.color === color);
+    });
+    document.querySelectorAll('#variantColorsSection .variant-chip').forEach(btn => {
+      btn.classList.toggle('selected', btn.textContent.trim() === color);
+    });
+    const tag = document.getElementById('selectedColorTag');
+    if (tag) tag.textContent = color;
+    _updateVariantConfirmBtn();
+  }
+
+  function _updateVariantConfirmBtn() {
+    const p = _variantProduct;
+    if (!p) return;
+    const hasSizes  = p.variants && p.variants.sizes  && p.variants.sizes.length  > 0;
+    const hasColors = p.variants && p.variants.colors && p.variants.colors.length > 0;
+    const sizeReady  = !hasSizes  || _variantSelectedSize  !== null;
+    const colorReady = !hasColors || _variantSelectedColor !== null;
+    const canConfirm = sizeReady && colorReady;
+    const btn = document.getElementById('variantConfirmBtn');
+    btn.disabled = !canConfirm;
+    if (canConfirm) {
+      const parts = [_variantSelectedSize, _variantSelectedColor].filter(Boolean);
+      btn.textContent = parts.length ? `Adicionar — ${parts.join(' / ')}` : 'Adicionar ao carrinho';
+    } else {
+      const missing = [hasSizes && !_variantSelectedSize ? 'tamanho' : '', hasColors && !_variantSelectedColor ? 'cor' : ''].filter(Boolean);
+      btn.textContent = `Selecione ${missing.join(' e ')}`;
+    }
+  }
+
+  function confirmVariant() {
+    if (!_variantProduct || _variantSelectedSize === null || _variantSelectedColor === null) return;
+    const p = _variantProduct;
+    addToCart(p.name, p.price, p.unit || 'un', p.stock_quantity, _variantSelectedSize, _variantSelectedColor);
+    closeVariantModalDirect();
+  }
+
+  function closeVariantModalDirect() {
+    document.getElementById('variantModal').classList.remove('open');
+    document.body.style.overflow = '';
+    _variantProduct = null;
+  }
+
+  function closeVariantModal(event) {
+    if (event && event.target !== document.getElementById('variantModal')) return;
+    closeVariantModalDirect();
+  }
+
   function cardHtml(p) {
     const img = p.image_url
       ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onclick="openImgModal('${escAttr(p.image_url)}','${escAttr(p.name)}')" onerror="this.parentNode.innerHTML=placeholderSvgInner()">`
@@ -1369,30 +1823,54 @@
       : p.stock_quantity === 1
         ? `<div><span class="badge-ultima">Última unidade</span></div>`
         : '';
+    // stockCount calculado depois do bloco de variantes (ver abaixo)
+    let stockCount = '';
 
-    const inCart = cart.has(p.name);
+    const hasVariants = p.variants && ((p.variants.sizes && p.variants.sizes.length > 0) || (p.variants.colors && p.variants.colors.length > 0));
+    const simpleKey = `${p.name}||`;
+    const totalInCart = (() => { let t = 0; cart.forEach(i => { if (i.name === p.name) t += i.qty; }); return t; })();
+    const inCart = !hasVariants && cart.has(simpleKey);
     let actionBtn;
+
     if (viewingOrder) {
-      const qty = inCart ? cart.get(p.name).qty : 0;
       actionBtn = `
         <div class="card-qty-ctrl">
           <button disabled style="opacity:0.3;cursor:default">−</button>
-          <span>${qty}</span>
+          <span>${totalInCart}</span>
           <button disabled style="opacity:0.3;cursor:default">+</button>
         </div>`;
     } else if (esgotado) {
       actionBtn = `<button class="btn-add" disabled>Esgotado</button>`;
+    } else if (hasVariants) {
+      const cartBadge = totalInCart > 0
+        ? `<div class="variant-in-cart-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M9 11l3 3L22 4"/></svg>
+            ${totalInCart} ${totalInCart === 1 ? 'item' : 'itens'} no carrinho
+           </div>`
+        : '';
+      actionBtn = `
+        ${cartBadge}
+        <button class="btn-add" onclick="openVariantByName('${escAttr(p.name)}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Escolher opções
+        </button>`;
+      if (!esgotado && p.stock_quantity > 1) {
+        stockCount = `<div class="card-stock-count">${p.stock_quantity} em estoque</div>`;
+      }
     } else if (inCart) {
-      const qty = cart.get(p.name).qty;
+      const qty = cart.get(simpleKey).qty;
       const atMax = qty >= p.stock_quantity;
       actionBtn = `
         <div class="card-qty-ctrl">
-          <button onclick="changeQty('${escAttr(p.name)}', -1)">−</button>
+          <button onclick="changeQty('${escAttr(simpleKey)}', -1)">−</button>
           <span>${qty}</span>
-          <button onclick="changeQty('${escAttr(p.name)}', 1)" ${atMax ? 'disabled style="opacity:0.3;cursor:default"' : ''}>+</button>
+          <button onclick="changeQty('${escAttr(simpleKey)}', 1)" ${atMax ? 'disabled style="opacity:0.3;cursor:default"' : ''}>+</button>
         </div>
         ${atMax ? `<div class="qty-limit-msg">Limite do estoque atingido</div>` : ''}`;
     } else {
+      if (!esgotado && p.stock_quantity > 1) {
+        stockCount = `<div class="card-stock-count">${p.stock_quantity} em estoque</div>`;
+      }
       actionBtn = `
         <button class="btn-add" onclick="addToCart('${escAttr(p.name)}', ${p.price}, '${escAttr(p.unit || 'un')}', ${p.stock_quantity})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1410,6 +1888,7 @@
           <div class="card-name">${escHtml(p.name)}</div>
           <div>${cat}${unit}</div>
           <div class="card-price">${formatPrice(p.price)}</div>
+          ${stockCount}
           ${stockBadge}
           ${actionBtn}
         </div>
@@ -1496,7 +1975,7 @@
         document.getElementById('main').after(btn);
       } else {
         const products = await supabaseGet(
-          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,unit,stock_quantity&order=name.asc`
+          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,unit,stock_quantity,variants,variant_stock&order=name.asc`
         );
         allProducts = products;
         document.getElementById('productCount').textContent =
