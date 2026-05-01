@@ -104,7 +104,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 14px;
-      padding: 16px;
+      padding: 16px 16px 96px;
       max-width: 680px;
       margin: 0 auto;
     }
@@ -602,8 +602,12 @@
     }
     .pre-qty-row {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    .pre-qty-row .pre-qty-ctrl {
+      align-self: center;
     }
     .pre-qty-ctrl {
       display: flex;
@@ -919,6 +923,68 @@
       justify-content: center;
     }
     .card-img { cursor: zoom-in; }
+
+    /* ── Botão Encomendar (produto esgotado) ── */
+    .btn-encomendar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px 0;
+      background: linear-gradient(135deg, #5B3FB5, #7C3AED);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-encomendar:hover { opacity: 0.88; }
+    .btn-encomendar svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ── Modal de Encomenda ── */
+    .encomenda-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .encomenda-overlay.open { display: flex; }
+    .encomenda-modal {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      padding: 28px 24px 44px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .encomenda-modal h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #7C3AED;
+      margin-bottom: 4px;
+    }
+    .encomenda-modal .checkout-subtitle { margin-bottom: 16px; }
+    .encomenda-product-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,0.08);
+      border: 1.5px solid rgba(124,58,237,0.25);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #5B3FB5;
+      margin-bottom: 20px;
+    }
 
     /* ── Resumo do Pedido ── */
     .pedido-banner {
@@ -1498,6 +1564,81 @@
     document.getElementById('cartDrawer').classList.remove('open');
   }
 
+  // ── Encomenda de produto esgotado ────────────────────────
+
+  let _encomendaProductName = '';
+  let _encomendaProductPrice = null;
+
+  function openEncomenda(productName, productPrice) {
+    _encomendaProductName = productName;
+    _encomendaProductPrice = productPrice;
+    const chip = document.getElementById('encomendaProductChip');
+    chip.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      </svg>
+      ${escHtml(productName)}${productPrice != null ? ' — ' + formatPrice(productPrice) : ''}`;
+    document.getElementById('encomendaName').value = '';
+    document.getElementById('encomendaPhone').value = '';
+    document.getElementById('encomendaNotes').value = '';
+    document.getElementById('encomendaError').style.display = 'none';
+    document.getElementById('encomendaSubmitBtn').style.display = '';
+    document.getElementById('encomendaSubmitBtn').disabled = false;
+    document.getElementById('encomendaSubmitBtn').textContent = 'Solicitar Encomenda';
+    document.querySelector('.checkout-back').style.display = '';
+    document.getElementById('encomendaSuccessStep').style.display = 'none';
+    document.getElementById('encomendaOverlay').classList.add('open');
+  }
+
+  function closeEncomenda() {
+    document.getElementById('encomendaOverlay').classList.remove('open');
+  }
+
+  function handleEncomendaOverlayClick(e) {
+    if (e.target === document.getElementById('encomendaOverlay')) closeEncomenda();
+  }
+
+  async function submitEncomenda() {
+    const name  = document.getElementById('encomendaName').value.trim();
+    const phone = document.getElementById('encomendaPhone').value.trim();
+    const notes = document.getElementById('encomendaNotes').value.trim();
+    const errEl = document.getElementById('encomendaError');
+    const btn   = document.getElementById('encomendaSubmitBtn');
+
+    errEl.style.display = 'none';
+    if (!name) { errEl.textContent = 'Informe seu nome.'; errEl.style.display = 'block'; return; }
+    if (!phone) { errEl.textContent = 'Informe seu telefone.'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner-sm"></div> Enviando...';
+
+    try {
+      await supabasePost('pedidos', {
+        user_id:       storeUserId,
+        customer_name: name,
+        phone:         phone,
+        description:   _encomendaProductName,
+        amount:        _encomendaProductPrice,
+        status:        'pendente',
+        source:        'catalog',
+        is_encomenda:  true,
+        notes:         notes || null,
+      });
+
+      document.getElementById('encomendaSuccessMsg').textContent =
+        `Encomenda de "${_encomendaProductName}" registrada, ${name.split(' ')[0]}! O vendedor entrará em contato.`;
+      btn.style.display = 'none';
+      document.querySelector('.checkout-back').style.display = 'none';
+      document.getElementById('encomendaSuccessStep').style.display = '';
+    } catch (e) {
+      console.error(e);
+      errEl.textContent = 'Erro ao enviar. Verifique sua conexão e tente novamente.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Solicitar Encomenda';
+    }
+  }
+
   // ── Catálogo ─────────────────────────────────────────────
 
   async function supabaseGet(path) {
@@ -1903,7 +2044,13 @@
           <button disabled style="opacity:0.3;cursor:default">+</button>
         </div>`;
     } else if (esgotado) {
-      actionBtn = `<button class="btn-add" disabled>Esgotado</button>`;
+      actionBtn = `
+        <button class="btn-encomendar" onclick="openEncomenda('${escAttr(p.name)}',${p.price != null ? p.price : 'null'})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          Encomendar
+        </button>`;
     } else if (hasVariants) {
       const cartBadge = totalInCart > 0
         ? `<div class="variant-in-cart-badge">
@@ -1945,7 +2092,7 @@
               <span id="pqv-${safeId}">${pq}</span>
               <button onclick="changePreQty('${escAttr(p.name)}',${p.stock_quantity},1)" ${pqAtMax ? 'disabled' : ''}>+</button>
             </div>
-            <button class="btn-add" style="flex:1;margin:0" onclick="addWithPreQty('${escAttr(p.name)}',${p.price},'${escAttr(p.unit||'un')}',${p.stock_quantity})">
+            <button class="btn-add" style="width:100%;margin:0" onclick="addWithPreQty('${escAttr(p.name)}',${p.price},'${escAttr(p.unit||'un')}',${p.stock_quantity})">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -2104,6 +2251,50 @@
 
   load();
 </script>
+
+<!-- Modal de Encomenda -->
+<div class="encomenda-overlay" id="encomendaOverlay" onclick="handleEncomendaOverlayClick(event)">
+  <div class="encomenda-modal" onclick="event.stopPropagation()">
+    <h2>Encomendar produto</h2>
+    <p class="checkout-subtitle">Produto esgotado — avise o vendedor que você quer!</p>
+
+    <div id="encomendaProductChip" class="encomenda-product-chip"></div>
+
+    <div class="checkout-error" id="encomendaError"></div>
+
+    <div class="checkout-field">
+      <label for="encomendaName">Nome completo *</label>
+      <input type="text" id="encomendaName" placeholder="Seu nome" autocomplete="name" />
+    </div>
+    <div class="checkout-field">
+      <label for="encomendaPhone">Telefone / WhatsApp *</label>
+      <input type="tel" id="encomendaPhone" placeholder="(11) 99999-9999" autocomplete="tel" />
+    </div>
+    <div class="checkout-field">
+      <label for="encomendaNotes">Observações (opcional)</label>
+      <textarea id="encomendaNotes" placeholder="Ex: quantidade, cor, tamanho..."></textarea>
+    </div>
+
+    <button class="btn-confirm" id="encomendaSubmitBtn" onclick="submitEncomenda()" style="background:#7C3AED">
+      Solicitar Encomenda
+    </button>
+    <button class="checkout-back" onclick="closeEncomenda()">← Voltar</button>
+
+    <div id="encomendaSuccessStep" style="display:none">
+      <div class="checkout-success">
+        <div class="success-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2E7D32"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        </div>
+        <h3 style="color:#2E7D32">Encomenda registrada!</h3>
+        <p id="encomendaSuccessMsg">O vendedor vai entrar em contato em breve.</p>
+        <button class="btn-close-checkout" onclick="closeEncomenda()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal de Checkout -->
 <div class="checkout-overlay" id="checkoutOverlay" onclick="handleOverlayClick(event)">
