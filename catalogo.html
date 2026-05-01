@@ -2042,16 +2042,41 @@
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
-    const esgotado = p.stock_quantity <= 0;
-    const stockBadge = esgotado
-      ? `<div><span class="badge-esgotado">Esgotado</span></div>`
-      : p.stock_quantity === 1
-        ? `<div><span class="badge-ultima">Última unidade</span></div>`
-        : '';
-    // stockCount calculado depois do bloco de variantes (ver abaixo)
-    let stockCount = '';
 
     const hasVariants = p.variants && ((p.variants.sizes && p.variants.sizes.length > 0) || (p.variants.colors && p.variants.colors.length > 0));
+
+    // Para produtos com variantes, esgotado é calculado via variant_stock
+    let esgotado = p.stock_quantity <= 0;
+    let variantAvail = null;
+    if (hasVariants) {
+      const vs = p.variant_stock || {};
+      const hasVS = Object.keys(vs).length > 0;
+      const hasSzV = p.variants.sizes && p.variants.sizes.length > 0;
+      const hasCLV = p.variants.colors && p.variants.colors.length > 0;
+      if (hasVS) {
+        const getVS = (sz, cl) => vs[`${sz||''}||${cl||''}`] ?? 0;
+        const sizeOk = sz => hasCLV ? p.variants.colors.some(c => getVS(sz, c) > 0) : getVS(sz, '') > 0;
+        const colorOk = cl => hasSzV ? p.variants.sizes.some(s => getVS(s, cl) > 0) : getVS('', cl) > 0;
+        esgotado = Object.values(vs).every(v => v <= 0);
+        variantAvail = {
+          sizes:  hasSzV ? p.variants.sizes.map(s  => ({ name: s,  avail: sizeOk(s) }))  : [],
+          colors: hasCLV ? p.variants.colors.map(c => ({ name: c,  avail: colorOk(c) })) : [],
+        };
+      } else {
+        variantAvail = {
+          sizes:  (hasSzV ? p.variants.sizes  : []).map(s => ({ name: s, avail: !esgotado })),
+          colors: (hasCLV ? p.variants.colors : []).map(c => ({ name: c, avail: !esgotado })),
+        };
+      }
+    }
+
+    const stockBadge = esgotado
+      ? `<div><span class="badge-esgotado">Esgotado</span></div>`
+      : p.stock_quantity === 1 && !hasVariants
+        ? `<div><span class="badge-ultima">Última unidade</span></div>`
+        : '';
+    let stockCount = '';
+
     const simpleKey = `${p.name}||`;
     const totalInCart = (() => { let t = 0; cart.forEach(i => { if (i.name === p.name) t += i.qty; }); return t; })();
     const inCart = !hasVariants && cart.has(simpleKey);
@@ -2079,13 +2104,35 @@
             ${totalInCart} ${totalInCart === 1 ? 'item' : 'itens'} no carrinho
            </div>`
         : '';
+
+      // Chips inline mostrando disponibilidade por variante
+      let inlineChips = '';
+      if (variantAvail) {
+        const rows = [];
+        if (variantAvail.sizes.length > 0) {
+          rows.push(`<div class="card-variant-row">${variantAvail.sizes.map(({ name: s, avail }) =>
+            `<span class="chip-sm${avail ? '' : ' chip-sm-esgotado'}" title="${avail ? '' : 'Esgotado'}">${escHtml(s)}</span>`
+          ).join('')}</div>`);
+        }
+        if (variantAvail.colors.length > 0) {
+          rows.push(`<div class="card-variant-row">${variantAvail.colors.map(({ name: c, avail }) => {
+            const css = getColorCss(c);
+            return css
+              ? `<span class="swatch-sm${avail ? '' : ' swatch-sm-esgotado'}" style="background:${css}" title="${escHtml(c)}${avail ? '' : ' (esgotado)'}"></span>`
+              : `<span class="chip-sm${avail ? '' : ' chip-sm-esgotado'}" title="${avail ? '' : 'Esgotado'}">${escHtml(c)}</span>`;
+          }).join('')}</div>`);
+        }
+        if (rows.length) inlineChips = `<div class="card-variants">${rows.join('')}</div>`;
+      }
+
       actionBtn = `
+        ${inlineChips}
         ${cartBadge}
         <button class="btn-add" onclick="openVariantByName('${escAttr(p.name)}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           Escolher opções
         </button>`;
-      if (!esgotado && p.stock_quantity > 1) {
+      if (p.stock_quantity > 1) {
         stockCount = `<div class="card-stock-count">${p.stock_quantity} em estoque</div>`;
       }
     } else if (inCart) {
