@@ -596,6 +596,44 @@
       text-align: center;
     }
 
+    /* ── Seletor de quantidade pré-adição ── */
+    .pre-qty-wrap {
+      margin-top: 10px;
+    }
+    .pre-qty-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pre-qty-ctrl {
+      display: flex;
+      align-items: center;
+      background: rgba(91,63,181,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pre-qty-ctrl button {
+      width: 32px;
+      height: 34px;
+      border: none;
+      background: transparent;
+      color: #5B3FB5;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .pre-qty-ctrl button:hover:not(:disabled) { background: rgba(91,63,181,0.15); }
+    .pre-qty-ctrl button:disabled { opacity: 0.3; cursor: default; }
+    .pre-qty-ctrl span {
+      min-width: 26px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #3B2C8A;
+    }
+
     /* ── Variantes inline no card ── */
     .card-variants { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
     .card-variant-label {
@@ -1261,6 +1299,31 @@
     return map[name.toLowerCase().trim()] || null;
   }
 
+  // ── Quantidade pré-adição (produtos simples) ─────────────
+  const preQty = {}; // { productName: qty }
+
+  function getPreQty(name) { return preQty[name] || 1; }
+
+  function changePreQty(name, stock, delta) {
+    const next = Math.max(1, Math.min(stock, getPreQty(name) + delta));
+    preQty[name] = next;
+    const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+    const valEl = document.getElementById(`pqv-${safeId}`);
+    const minBtn = document.getElementById(`pqm-${safeId}`);
+    if (valEl) valEl.textContent = next;
+    if (minBtn) minBtn.disabled = next <= 1;
+  }
+
+  function addWithPreQty(name, price, unit, stock) {
+    const qty = getPreQty(name);
+    const key = `${name}||`;
+    cart.set(key, { key, name, price, unit, stock, qty });
+    delete preQty[name];
+    syncCartUI();
+    applyFilters();
+    showToast(`${qty}× ${name} adicionado`);
+  }
+
   // ── Carrinho ──────────────────────────────────────────────
   // cart: Map<name, { name, price, unit, qty }>
   const cart = new Map();
@@ -1871,14 +1934,26 @@
       if (!esgotado && p.stock_quantity > 1) {
         stockCount = `<div class="card-stock-count">${p.stock_quantity} em estoque</div>`;
       }
+      const pq = getPreQty(p.name);
+      const pqAtMax = pq >= p.stock_quantity;
+      const safeId = p.name.replace(/[^a-zA-Z0-9]/g, '_');
       actionBtn = `
-        <button class="btn-add" onclick="addToCart('${escAttr(p.name)}', ${p.price}, '${escAttr(p.unit || 'un')}', ${p.stock_quantity})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
-          Adicionar
-        </button>`;
+        <div class="pre-qty-wrap">
+          <div class="pre-qty-row">
+            <div class="pre-qty-ctrl">
+              <button id="pqm-${safeId}" onclick="changePreQty('${escAttr(p.name)}',${p.stock_quantity},-1)" ${pq <= 1 ? 'disabled' : ''}>−</button>
+              <span id="pqv-${safeId}">${pq}</span>
+              <button onclick="changePreQty('${escAttr(p.name)}',${p.stock_quantity},1)" ${pqAtMax ? 'disabled' : ''}>+</button>
+            </div>
+            <button class="btn-add" style="flex:1;margin:0" onclick="addWithPreQty('${escAttr(p.name)}',${p.price},'${escAttr(p.unit||'un')}',${p.stock_quantity})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              Adicionar
+            </button>
+          </div>
+        </div>`;
     }
 
     return `
