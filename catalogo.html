@@ -122,6 +122,31 @@
       transform: translateY(-3px);
       box-shadow: 0 8px 24px rgba(59,44,138,0.15);
     }
+    .card-img-wrap {
+      position: relative;
+    }
+    .card-esgotado-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0;
+    }
+    .card-esgotado-overlay span {
+      background: #dc2626;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 6px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transform: rotate(-15deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
     .card-img {
       width: 100%;
       aspect-ratio: 1;
@@ -2037,11 +2062,12 @@
   }
 
   function cardHtml(p) {
-    const img = p.image_url
+    const imgInner = p.image_url
       ? `<img class="card-img" src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" loading="lazy" onclick="openImgModal('${escAttr(p.image_url)}','${escAttr(p.name)}')" onerror="this.parentNode.innerHTML=placeholderSvgInner()">`
       : `<div class="card-img-placeholder">${placeholderSvgInner()}</div>`;
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
+    // img será finalizado após calcular esgotado (precisa do overlay)
 
     const hasVariants = p.variants && ((p.variants.sizes && p.variants.sizes.length > 0) || (p.variants.colors && p.variants.colors.length > 0));
 
@@ -2170,6 +2196,10 @@
           </div>
         </div>`;
     }
+
+    const img = esgotado
+      ? `<div class="card-img-wrap">${imgInner}<div class="card-esgotado-overlay"><span>Esgotado</span></div></div>`
+      : imgInner;
 
     return `
       <div class="card">
