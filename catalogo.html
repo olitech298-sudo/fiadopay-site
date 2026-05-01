@@ -730,7 +730,9 @@
       max-height: 280px;
       object-fit: cover;
       display: block;
+      transition: opacity 0.25s ease;
     }
+    .variant-product-img-wrap img.fading { opacity: 0; }
     .variant-product-img-placeholder {
       width: 100%;
       height: 160px;
@@ -1965,6 +1967,19 @@
     _updateVariantConfirmBtn();
   }
 
+  function _switchVariantImage(newUrl) {
+    const imgWrap = document.getElementById('variantProductImg');
+    const img = imgWrap.querySelector('img');
+    if (!img) { imgWrap.innerHTML = `<img src="${escHtml(newUrl)}" alt="">`; return; }
+    if (img.src === newUrl) return;
+    img.classList.add('fading');
+    setTimeout(() => {
+      img.src = newUrl;
+      img.onload = () => img.classList.remove('fading');
+      img.onerror = () => img.classList.remove('fading');
+    }, 250);
+  }
+
   function selectVariantColor(color) {
     _variantSelectedColor = color;
     document.querySelectorAll('#variantColorsSection .variant-color-swatch-btn').forEach(btn => {
@@ -1975,6 +1990,12 @@
     });
     const tag = document.getElementById('selectedColorTag');
     if (tag) tag.textContent = color;
+    const ci = _variantProduct && _variantProduct.color_images;
+    if (ci && ci[color]) {
+      _switchVariantImage(ci[color]);
+    } else if (_variantProduct && _variantProduct.image_url) {
+      _switchVariantImage(_variantProduct.image_url);
+    }
     _updateVariantConfirmBtn();
   }
 
@@ -2197,7 +2218,7 @@
         document.getElementById('main').after(btn);
       } else {
         const products = await supabaseGet(
-          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,unit,stock_quantity,variants,variant_stock&order=name.asc`
+          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,image_url,color_images,unit,stock_quantity,variants,variant_stock&order=name.asc`
         );
         allProducts = products;
         document.getElementById('productCount').textContent =
