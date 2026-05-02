@@ -861,7 +861,9 @@
     }
     .variant-chip:hover:not(.esgotado) { border-color: #5c3fb5; color: #5c3fb5; }
     .variant-chip.selected { border-color: #5c3fb5; background: #5c3fb5; color: #fff; }
-    .variant-chip.esgotado { opacity: 0.38; cursor: not-allowed; text-decoration: line-through; background: #f5f5f5; }
+    .variant-chip.esgotado { opacity: 0.55; color: #aaa; cursor: pointer; text-decoration: line-through; }
+    .variant-chip.esgotado:hover { border-color: #d97706; color: #d97706; opacity: 0.85; text-decoration: none; }
+    .variant-chip.esgotado.selected { border-color: #d97706; background: #d97706; color: #fff; opacity: 1; text-decoration: none; }
     /* Color swatches */
     .variant-color-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
     .variant-color-swatch-btn {
@@ -877,7 +879,27 @@
       transition: background 0.15s;
     }
     .variant-color-swatch-btn:hover:not(.esgotado) { background: rgba(91,63,181,0.08); }
-    .variant-color-swatch-btn.esgotado { opacity: 0.38; cursor: not-allowed; }
+    .variant-color-swatch-btn.esgotado { opacity: 0.55; cursor: pointer; }
+    .variant-color-swatch-btn.esgotado .variant-color-circle { position: relative; }
+    .variant-color-swatch-btn.esgotado:hover { background: rgba(91,63,181,0.06); opacity: 0.8; }
+    .variant-color-swatch-btn.combo-sel-esgotado .variant-color-circle { position: relative; }
+    .variant-color-swatch-btn.combo-sel-esgotado .variant-color-circle::after {
+      content: '!';
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 17px;
+      height: 17px;
+      background: #dc2626;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 17px;
+      text-align: center;
+      border: 2px solid #fff;
+      pointer-events: none;
+    }
     .variant-color-circle {
       width: 42px;
       height: 42px;
@@ -917,6 +939,20 @@
       transition: opacity 0.15s;
     }
     .btn-variant-confirm:disabled { opacity: 0.4; cursor: default; }
+    .variant-esgotado-alert {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+    .variant-esgotado-alert.visible { display: flex; }
     /* Cart count badge on variant cards */
     .variant-in-cart-badge {
       display: flex;
@@ -1332,6 +1368,10 @@
     <div id="variantProductImg" class="variant-product-img-wrap"></div>
     <div class="variant-body">
       <div class="variant-handle"></div>
+      <div class="variant-esgotado-alert" id="variantEsgotadoAlert">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Produto sem estoque, deseja encomendar?
+      </div>
       <div class="variant-header">
         <div class="variant-product-name" id="variantProductName"></div>
         <div class="variant-product-price" id="variantProductPrice"></div>
@@ -1940,6 +1980,8 @@
     document.getElementById('variantProductName').textContent = p.name;
     document.getElementById('variantProductPrice').textContent = formatPrice(p.price);
     document.getElementById('variantStockInfo').textContent = '';
+    const alertElInit = document.getElementById('variantEsgotadoAlert');
+    if (alertElInit) alertElInit.classList.remove('visible');
 
     // helper: variant stock
     const vs = p.variant_stock || {};
@@ -1960,8 +2002,8 @@
           ${p.variants.sizes.map(s => {
             const avail = sizeOk(s);
             return `<button class="variant-chip${avail ? '' : ' esgotado'}"
-              onclick="${avail ? `selectVariantSize('${escAttr(s)}')` : 'void 0'}"
-              title="${avail ? '' : 'Esgotado'}">${escHtml(s)}</button>`;
+              onclick="selectVariantSize('${escAttr(s)}')"
+              title="${avail ? '' : 'Sem estoque — clique para encomendar'}">${escHtml(s)}</button>`;
           }).join('')}
         </div>`;
     } else {
@@ -1975,14 +2017,14 @@
         const css = getColorCss(c);
         if (css) {
           return `<button class="variant-color-swatch-btn${avail ? '' : ' esgotado'}"
-            onclick="${avail ? `selectVariantColor('${escAttr(c)}')` : 'void 0'}"
-            data-color="${escAttr(c)}" title="${escHtml(c)}${avail ? '' : ' (esgotado)'}">
+            onclick="selectVariantColor('${escAttr(c)}')"
+            data-color="${escAttr(c)}" title="${escHtml(c)}${avail ? '' : ' — sem estoque, clique para encomendar'}">
             <div class="variant-color-circle" style="background:${css}"></div>
             <span class="variant-color-name">${escHtml(c)}</span>
           </button>`;
         }
         return `<button class="variant-chip${avail ? '' : ' esgotado'}"
-          onclick="${avail ? `selectVariantColor('${escAttr(c)}')` : 'void 0'}">${escHtml(c)}</button>`;
+          onclick="selectVariantColor('${escAttr(c)}')">${escHtml(c)}</button>`;
       }).join('');
       colorsSection.innerHTML = `
         <div class="variant-section-label">Cor <span class="variant-selected-tag" id="selectedColorTag"></span></div>
@@ -2047,8 +2089,39 @@
     const colorReady = !hasColors || _variantSelectedColor !== null;
     const canConfirm = sizeReady && colorReady;
     const btn = document.getElementById('variantConfirmBtn');
-    btn.disabled = !canConfirm;
+    const alertEl = document.getElementById('variantEsgotadoAlert');
+
+    // Check if specific size+color combo is in stock
+    let comboEsgotado = false;
     if (canConfirm) {
+      const vs = p.variant_stock || {};
+      const hasVS = Object.keys(vs).length > 0;
+      if (hasVS) {
+        const comboKey = `${_variantSelectedSize || ''}||${_variantSelectedColor || ''}`;
+        const comboStock = vs[comboKey] ?? 0;
+        comboEsgotado = comboStock <= 0;
+      }
+    }
+
+    btn.disabled = !canConfirm;
+    btn.classList.remove('combo-esgotado');
+
+    // Alert banner
+    if (alertEl) alertEl.classList.toggle('visible', comboEsgotado);
+
+    // Badge no círculo da cor selecionada
+    document.querySelectorAll('#variantColorsSection .variant-color-swatch-btn').forEach(b => {
+      b.classList.remove('combo-sel-esgotado');
+    });
+    if (comboEsgotado && _variantSelectedColor) {
+      const selBtn = document.querySelector(`#variantColorsSection .variant-color-swatch-btn[data-color="${_variantSelectedColor}"]`);
+      if (selBtn) selBtn.classList.add('combo-sel-esgotado');
+    }
+
+    if (comboEsgotado) {
+      const parts = [_variantSelectedSize, _variantSelectedColor].filter(Boolean);
+      btn.textContent = parts.length ? `Encomendar — ${parts.join(' / ')}` : 'Encomendar';
+    } else if (canConfirm) {
       const parts = [_variantSelectedSize, _variantSelectedColor].filter(Boolean);
       btn.textContent = parts.length ? `Adicionar — ${parts.join(' / ')}` : 'Adicionar ao carrinho';
     } else {
@@ -2058,8 +2131,23 @@
   }
 
   function confirmVariant() {
-    if (!_variantProduct || _variantSelectedSize === null || _variantSelectedColor === null) return;
+    if (!_variantProduct) return;
     const p = _variantProduct;
+    const hasSizes  = p.variants && p.variants.sizes  && p.variants.sizes.length  > 0;
+    const hasColors = p.variants && p.variants.colors && p.variants.colors.length > 0;
+    if ((hasSizes && _variantSelectedSize === null) || (hasColors && _variantSelectedColor === null)) return;
+    // Route to encomenda if specific combo is out of stock
+    const vs = p.variant_stock || {};
+    if (Object.keys(vs).length > 0) {
+      const comboStock = vs[`${_variantSelectedSize || ''}||${_variantSelectedColor || ''}`] ?? 0;
+      if (comboStock <= 0) {
+        const parts = [_variantSelectedSize, _variantSelectedColor].filter(Boolean);
+        const variantDesc = parts.length ? ` — ${parts.join(' / ')}` : '';
+        closeVariantModalDirect();
+        openEncomenda(`${p.name}${variantDesc}`, p.price);
+        return;
+      }
+    }
     addToCart(p.name, p.price, p.unit || 'un', p.stock_quantity, _variantSelectedSize, _variantSelectedColor);
     closeVariantModalDirect();
   }
