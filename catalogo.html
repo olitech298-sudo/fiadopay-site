@@ -2340,12 +2340,9 @@
     let actionBtn;
 
     if (viewingOrder) {
-      actionBtn = `
-        <div class="card-qty-ctrl">
-          <button disabled style="opacity:0.3;cursor:default">−</button>
-          <span>${totalInCart}</span>
-          <button disabled style="opacity:0.3;cursor:default">+</button>
-        </div>`;
+      actionBtn = totalInCart > 0
+        ? `<div class="card-order-qty-badge">${totalInCart}× no pedido</div>`
+        : '';
     } else if (esgotado) {
       actionBtn = `
         <button class="btn-encomendar" onclick="openEncomenda('${escAttr(p.name)}',${p.price != null ? p.price : 'null'})">
