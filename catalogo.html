@@ -1720,10 +1720,12 @@
 
   let _encomendaProductName = '';
   let _encomendaProductPrice = null;
+  let _encomendaBaseProductName = '';
 
-  function openEncomenda(productName, productPrice) {
+  function openEncomenda(productName, productPrice, baseName) {
     _encomendaProductName = productName;
     _encomendaProductPrice = productPrice;
+    _encomendaBaseProductName = baseName || productName;
     const chip = document.getElementById('encomendaProductChip');
     chip.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
@@ -1786,7 +1788,7 @@
         waLines += `\n\nNome: ${name}\nTelefone: ${phone}`;
         if (notes) waLines += `\nObservações: ${notes}`;
 
-        const encomendaPedidoEncoded = `${encodeURIComponent(_encomendaProductName)}:1`;
+        const encomendaPedidoEncoded = `${encodeURIComponent(_encomendaBaseProductName)}:1`;
         const encomendaPedidoUrl = window.location.origin + window.location.pathname + '?user=' + storeUserId + '&pedido=' + encomendaPedidoEncoded;
         waLines += `\n\n🔗 Ver produto da encomenda:\n${encomendaPedidoUrl}`;
 
@@ -2273,7 +2275,7 @@
         const parts = [_variantSelectedSize, _variantSelectedColor].filter(Boolean);
         const variantDesc = parts.length ? ` — ${parts.join(' / ')}` : '';
         closeVariantModalDirect();
-        openEncomenda(`${p.name}${variantDesc}`, p.price);
+        openEncomenda(`${p.name}${variantDesc}`, p.price, p.name);
         return;
       }
     }
