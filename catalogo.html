@@ -273,6 +273,18 @@
       color: #3B2C8A;
     }
 
+    .card-order-qty-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #ede9fa;
+      color: #5B3FB5;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
     /* ── Contagem de estoque ── */
     .card-stock-count {
       font-size: 11px;
@@ -2383,7 +2395,9 @@
     } else if (inCart) {
       const qty = cart.get(simpleKey).qty;
       const atMax = qty >= p.stock_quantity;
-      actionBtn = `
+      actionBtn = viewingOrder
+        ? `<div class="card-order-qty-badge">${qty}× no pedido</div>`
+        : `
         <div class="card-qty-ctrl">
           <button onclick="changeQty('${escAttr(simpleKey)}', -1)">−</button>
           <span>${qty}</span>
