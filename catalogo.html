@@ -1160,27 +1160,86 @@
       margin-bottom: 20px;
     }
     .checkout-summary {
-      background: #f4f2fb;
-      border-radius: 12px;
-      padding: 14px 16px;
+      border: 1.5px solid #e0d9f7;
+      border-radius: 14px;
+      overflow: hidden;
       margin-bottom: 20px;
+    }
+    .checkout-summary-header {
+      background: linear-gradient(135deg, #3B2C8A 0%, #5B3FB5 100%);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .checkout-summary-items {
+      padding: 6px 0;
+      background: #fff;
     }
     .checkout-summary-row {
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid #f4f2fb;
+      gap: 10px;
+    }
+    .checkout-summary-row:last-child { border-bottom: none; }
+    .checkout-summary-row-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .checkout-summary-qty-badge {
+      background: #ede9fa;
+      color: #5B3FB5;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .checkout-summary-name-wrap {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .checkout-summary-name {
       font-size: 13px;
-      color: #555;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: #1a1a2e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .checkout-summary-variant {
+      font-size: 11px;
+      color: #7c6ab5;
+      margin-top: 1px;
+    }
+    .checkout-summary-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: #3B2C8A;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .checkout-summary-total {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-weight: 800;
       font-size: 15px;
       color: #3B2C8A;
-      padding-top: 8px;
-      border-top: 1px solid #ddd;
-      margin-top: 8px;
+      padding: 11px 16px;
+      background: #f4f2fb;
+      border-top: 1.5px solid #e0d9f7;
     }
     .checkout-field { margin-bottom: 16px; }
     .checkout-field label {
@@ -1778,16 +1837,32 @@
     // Monta resumo do pedido
     let rows = '';
     cart.forEach(item => {
-      rows += `<div class="checkout-summary-row">
-        <span>${item.qty}x ${escHtml(item.name)}</span>
-        <span>${formatPrice(item.price * item.qty)}</span>
-      </div>`;
+      const variant = [item.size, item.color].filter(Boolean).join(' / ');
+      rows += `
+        <div class="checkout-summary-row">
+          <div class="checkout-summary-row-left">
+            <span class="checkout-summary-qty-badge">${item.qty}×</span>
+            <div class="checkout-summary-name-wrap">
+              <span class="checkout-summary-name">${escHtml(item.name)}</span>
+              ${variant ? `<span class="checkout-summary-variant">${escHtml(variant)}</span>` : ''}
+            </div>
+          </div>
+          <span class="checkout-summary-price">${formatPrice(item.price * item.qty)}</span>
+        </div>`;
     });
-    rows += `<div class="checkout-summary-total">
-      <span>Total estimado</span>
-      <span>${formatPrice(cartTotal())}</span>
-    </div>`;
-    document.getElementById('checkoutSummary').innerHTML = rows;
+
+    document.getElementById('checkoutSummary').innerHTML = `
+      <div class="checkout-summary-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        Resumo do Pedido
+      </div>
+      <div class="checkout-summary-items">${rows}</div>
+      <div class="checkout-summary-total">
+        <span>Total</span>
+        <span>${formatPrice(cartTotal())}</span>
+      </div>`;
     document.getElementById('checkoutError').style.display = 'none';
     document.getElementById('checkoutFormStep').style.display = '';
     document.getElementById('checkoutSuccessStep').style.display = 'none';
