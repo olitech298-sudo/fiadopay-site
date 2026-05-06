@@ -1276,6 +1276,24 @@
     .checkout-field input:focus,
     .checkout-field textarea:focus { border-color: #5B3FB5; }
     .checkout-field textarea { resize: none; height: 80px; }
+    .checkout-field select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      color: #1a1a2e;
+      background: #fff;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B3FB5' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+    .checkout-field select:focus { border-color: #5B3FB5; }
     .checkout-error {
       background: #ffeaea;
       color: #c62828;
@@ -1878,6 +1896,10 @@
         <span>${formatPrice(cartTotal())}</span>
       </div>`;
     document.getElementById('checkoutError').style.display = 'none';
+    document.getElementById('checkoutName').value = '';
+    document.getElementById('checkoutPhone').value = '';
+    document.getElementById('checkoutPayment').value = '';
+    document.getElementById('checkoutNotes').value = '';
     document.getElementById('checkoutFormStep').style.display = '';
     document.getElementById('checkoutSuccessStep').style.display = 'none';
     const btn = document.getElementById('checkoutSubmitBtn');
@@ -1895,11 +1917,12 @@
   }
 
   async function submitOrder() {
-    const name  = document.getElementById('checkoutName').value.trim();
-    const phone = rawPhone(document.getElementById('checkoutPhone').value);
-    const notes = document.getElementById('checkoutNotes').value.trim();
-    const errEl = document.getElementById('checkoutError');
-    const btn   = document.getElementById('checkoutSubmitBtn');
+    const name    = document.getElementById('checkoutName').value.trim();
+    const phone   = rawPhone(document.getElementById('checkoutPhone').value);
+    const payment = document.getElementById('checkoutPayment').value;
+    const notes   = document.getElementById('checkoutNotes').value.trim();
+    const errEl   = document.getElementById('checkoutError');
+    const btn     = document.getElementById('checkoutSubmitBtn');
 
     errEl.style.display = 'none';
 
@@ -1910,6 +1933,11 @@
     }
     if (!phone) {
       errEl.textContent = 'Por favor, informe seu telefone.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!payment) {
+      errEl.textContent = 'Por favor, selecione a forma de pagamento.';
       errEl.style.display = 'block';
       return;
     }
@@ -1955,7 +1983,7 @@
         amount:        parseFloat(amount.toFixed(2)),
         status:        'pendente',
         source:        'catalog',
-        notes:         notes || null,
+        notes:         [payment ? `Pagamento: ${payment}` : null, notes || null].filter(Boolean).join(' | ') || null,
       });
 
       // Captura itens do carrinho antes de limpar (para montar o link do pedido)
@@ -1982,7 +2010,7 @@
           waLines += `• ${qty}x ${label} — ${formatPrice(parseFloat(fp) * parseInt(qty))}\n`;
         });
         waLines += `\n*Total: ${formatPrice(amount)}*`;
-        waLines += `\n\nNome: ${name}\nTelefone: ${phone}`;
+        waLines += `\n\nNome: ${name}\nTelefone: ${phone}\nPagamento: ${payment}`;
         if (notes) waLines += `\nObservações: ${notes}`;
 
         const pedidoEncoded = [...cartSnapshot.entries()].map(([n, q]) => `${encodeURIComponent(n)}:${q}`).join('|');
@@ -2661,6 +2689,17 @@
       <div class="checkout-field">
         <label for="checkoutPhone">Telefone / WhatsApp *</label>
         <input type="tel" id="checkoutPhone" placeholder="(11) 99999-9999" autocomplete="tel" oninput="maskPhone(this)" />
+      </div>
+      <div class="checkout-field">
+        <label for="checkoutPayment">Forma de pagamento *</label>
+        <select id="checkoutPayment">
+          <option value="">Selecione...</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="PIX">PIX</option>
+          <option value="Cartão de débito">Cartão de débito</option>
+          <option value="Cartão de crédito">Cartão de crédito</option>
+          <option value="Fiado">Fiado</option>
+        </select>
       </div>
       <div class="checkout-field">
         <label for="checkoutNotes">Observações (opcional)</label>
