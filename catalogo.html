@@ -56,6 +56,31 @@
       color: rgba(255,255,255,0.75);
     }
 
+    /* ── Store Info ── */
+    .store-info {
+      display: none;
+      max-width: 680px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+    }
+    .store-description {
+      font-size: 14px;
+      color: #4a4a6a;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .store-hours {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #3B2C8A;
+      background: rgba(59,44,138,0.07);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+
     /* ── Search ── */
     .search-wrap {
       max-width: 680px;
@@ -1440,6 +1465,8 @@
   </div>
 </div>
 
+<div id="storeInfo" class="store-info"></div>
+
 <div class="search-wrap">
   <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
     <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -2557,7 +2584,7 @@
 
     try {
       const settings = await supabaseGet(
-        `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name,whatsapp_number,cover_image_url&limit=1`
+        `catalog_settings?user_id=eq.${userId}&catalog_public=eq.true&select=store_name,whatsapp_number,cover_image_url,description,business_hours&limit=1`
       );
 
       if (!settings.length) {
@@ -2576,6 +2603,25 @@
         const coverEl = document.getElementById('headerCover');
         coverEl.src = coverUrl;
         coverEl.style.display = 'block';
+      }
+
+      const description = settings[0].description || null;
+      const businessHours = settings[0].business_hours || null;
+      if (description || businessHours) {
+        const infoEl = document.getElementById('storeInfo');
+        if (description) {
+          const descEl = document.createElement('p');
+          descEl.className = 'store-description';
+          descEl.textContent = description;
+          infoEl.appendChild(descEl);
+        }
+        if (businessHours) {
+          const hoursEl = document.createElement('p');
+          hoursEl.className = 'store-hours';
+          hoursEl.innerHTML = `<span>🕐</span> ${businessHours}`;
+          infoEl.appendChild(hoursEl);
+        }
+        infoEl.style.display = 'block';
       }
 
       const produtoParam = params.get('produto');
