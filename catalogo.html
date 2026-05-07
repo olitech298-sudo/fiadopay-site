@@ -2618,7 +2618,7 @@
         if (businessHours) {
           const hoursEl = document.createElement('p');
           hoursEl.className = 'store-hours';
-          hoursEl.innerHTML = `<span>🕐</span> ${businessHours}`;
+          hoursEl.innerHTML = `<span>🕐</span> <strong>Horário de funcionamento:</strong> ${businessHours}`;
           infoEl.appendChild(hoursEl);
         }
         infoEl.style.display = 'block';
