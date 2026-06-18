@@ -1991,6 +1991,7 @@
   async function submitOrder() {
     const name    = document.getElementById('checkoutName').value.trim();
     const phone   = rawPhone(document.getElementById('checkoutPhone').value);
+    const address = document.getElementById('checkoutAddress').value.trim();
     const payment = document.getElementById('checkoutPayment').value;
     const notes   = document.getElementById('checkoutNotes').value.trim();
     const errEl   = document.getElementById('checkoutError');
@@ -2048,14 +2049,15 @@
       }
 
       await supabasePost('pedidos', {
-        user_id:       storeUserId,
-        customer_name: name,
-        phone:         phone,
-        description:   descParts.join(', '),
-        amount:        parseFloat(amount.toFixed(2)),
-        status:        payment === 'Fiado' ? 'aguardando_fiado' : 'pendente',
-        source:        'catalog',
-        notes:         [payment ? `Pagamento: ${payment}` : null, notes || null].filter(Boolean).join(' | ') || null,
+        user_id:          storeUserId,
+        customer_name:    name,
+        phone:            phone,
+        description:      descParts.join(', '),
+        amount:           parseFloat(amount.toFixed(2)),
+        status:           payment === 'Fiado' ? 'aguardando_fiado' : 'pendente',
+        source:           'catalog',
+        notes:            [payment ? `Pagamento: ${payment}` : null, notes || null].filter(Boolean).join(' | ') || null,
+        delivery_address: address || null,
       });
 
       // Captura itens do carrinho antes de limpar (para montar o link do pedido)
@@ -2788,6 +2790,10 @@
       <div class="checkout-field">
         <label for="checkoutPhone">Telefone / WhatsApp *</label>
         <input type="tel" id="checkoutPhone" placeholder="(11) 99999-9999" autocomplete="tel" oninput="maskPhone(this)" />
+      </div>
+      <div class="checkout-field">
+        <label for="checkoutAddress">Endereço de entrega (opcional)</label>
+        <input type="text" id="checkoutAddress" placeholder="Ex: Rua das Flores, 123 - Bairro, Cidade" autocomplete="street-address" />
       </div>
       <div class="checkout-field">
         <label for="checkoutPayment">Forma de pagamento *</label>
