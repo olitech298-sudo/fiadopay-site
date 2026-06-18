@@ -1354,6 +1354,13 @@
       cursor: pointer;
     }
     .checkout-field select:focus { border-color: #5B3FB5; }
+    .cep-row { display: flex; gap: 10px; align-items: flex-end; }
+    .cep-row .cep-input-wrap { flex: 0 0 150px; }
+    .cep-row .cep-status { flex: 1; font-size: 12px; color: #888; padding-bottom: 4px; }
+    .addr-row { display: flex; gap: 10px; }
+    .addr-row .addr-logradouro { flex: 1; }
+    .addr-row .addr-numero { flex: 0 0 90px; }
+    .checkout-field input[readonly] { background: #f5f5f5; color: #666; cursor: default; }
     .checkout-error {
       background: #ffeaea;
       color: #c62828;
@@ -1991,7 +1998,7 @@
   async function submitOrder() {
     const name    = document.getElementById('checkoutName').value.trim();
     const phone   = rawPhone(document.getElementById('checkoutPhone').value);
-    const address = document.getElementById('checkoutAddress').value.trim();
+    const address = buildDeliveryAddress();
     const payment = document.getElementById('checkoutPayment').value;
     const notes   = document.getElementById('checkoutNotes').value.trim();
     const errEl   = document.getElementById('checkoutError');
@@ -2124,6 +2131,51 @@
 
   function formatPrice(value) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  }
+
+  function maskCep(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+    input.value = v;
+    if (v.replace(/\D/g, '').length === 8) buscarCep(v.replace(/\D/g, ''));
+  }
+
+  async function buscarCep(cep) {
+    const status = document.getElementById('cepStatus');
+    const fields = document.getElementById('addrFields');
+    status.textContent = 'Buscando...';
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        status.textContent = 'CEP não encontrado.';
+        fields.style.display = 'none';
+        return;
+      }
+      document.getElementById('checkoutLogradouro').value = data.logradouro || '';
+      document.getElementById('checkoutBairro').value = data.bairro || '';
+      document.getElementById('checkoutCidade').value = `${data.localidade}-${data.uf}`;
+      document.getElementById('checkoutNumero').value = '';
+      document.getElementById('checkoutComplemento').value = '';
+      fields.style.display = 'block';
+      status.textContent = '';
+      document.getElementById('checkoutNumero').focus();
+    } catch {
+      status.textContent = 'Erro ao buscar CEP.';
+    }
+  }
+
+  function buildDeliveryAddress() {
+    const cep = document.getElementById('checkoutCep').value.trim();
+    if (!cep) return null;
+    const logradouro   = document.getElementById('checkoutLogradouro').value.trim();
+    const numero       = document.getElementById('checkoutNumero').value.trim();
+    const complemento  = document.getElementById('checkoutComplemento').value.trim();
+    const bairro       = document.getElementById('checkoutBairro').value.trim();
+    const cidade       = document.getElementById('checkoutCidade').value.trim();
+    const parts = [logradouro, numero, complemento].filter(Boolean).join(', ');
+    const suffix = [bairro, cidade].filter(Boolean).join(', ');
+    return [parts, suffix].filter(Boolean).join(' - ') || null;
   }
 
   function maskPhone(input) {
@@ -2792,8 +2844,39 @@
         <input type="tel" id="checkoutPhone" placeholder="(11) 99999-9999" autocomplete="tel" oninput="maskPhone(this)" />
       </div>
       <div class="checkout-field">
-        <label for="checkoutAddress">Endereço de entrega (opcional)</label>
-        <input type="text" id="checkoutAddress" placeholder="Ex: Rua das Flores, 123 - Bairro, Cidade" autocomplete="street-address" />
+        <label>Endereço de entrega (opcional)</label>
+        <div class="cep-row">
+          <div class="cep-input-wrap">
+            <input type="tel" id="checkoutCep" placeholder="CEP (00000-000)" maxlength="9" oninput="maskCep(this)" />
+          </div>
+          <div class="cep-status" id="cepStatus"></div>
+        </div>
+      </div>
+      <div id="addrFields" style="display:none">
+        <div class="checkout-field addr-row">
+          <div class="addr-logradouro">
+            <label for="checkoutLogradouro">Rua / Avenida</label>
+            <input type="text" id="checkoutLogradouro" placeholder="Logradouro" autocomplete="address-line1" />
+          </div>
+          <div class="addr-numero">
+            <label for="checkoutNumero">Número</label>
+            <input type="text" id="checkoutNumero" placeholder="Nº" />
+          </div>
+        </div>
+        <div class="checkout-field">
+          <label for="checkoutComplemento">Complemento (opcional)</label>
+          <input type="text" id="checkoutComplemento" placeholder="Apto, bloco, casa..." />
+        </div>
+        <div class="checkout-field addr-row">
+          <div class="addr-logradouro">
+            <label for="checkoutBairro">Bairro</label>
+            <input type="text" id="checkoutBairro" placeholder="Bairro" />
+          </div>
+          <div class="addr-numero" style="flex:0 0 130px">
+            <label for="checkoutCidade">Cidade / UF</label>
+            <input type="text" id="checkoutCidade" placeholder="Cidade-UF" readonly />
+          </div>
+        </div>
       </div>
       <div class="checkout-field">
         <label for="checkoutPayment">Forma de pagamento *</label>
