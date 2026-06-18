@@ -328,21 +328,32 @@
     }
     .card-qty-ctrl button:hover { background: rgba(91,63,181,0.15); }
     .card-qty-ctrl span {
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: #3B2C8A;
+      min-width: 26px;
+      text-align: center;
     }
 
-    .card-order-qty-badge {
-      display: inline-flex;
+    .card-qty-img-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      z-index: 3;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 9px;
+      border-radius: 18px;
+      background: #5B3FB5;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
       align-items: center;
-      background: #ede9fa;
-      color: #5B3FB5;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-top: 8px;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      pointer-events: none;
+      line-height: 1;
     }
 
     /* ── Contagem de estoque ── */
@@ -1027,13 +1038,7 @@
     .variant-esgotado-alert.visible { display: flex; }
     /* Cart count badge on variant cards */
     .variant-in-cart-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #5c3fb5;
-      margin-bottom: 6px;
+      display: none;
     }
 
     /* ── Image Modal ── */
@@ -2532,9 +2537,7 @@
     let actionBtn;
 
     if (viewingOrder) {
-      actionBtn = totalInCart > 0
-        ? `<div class="card-order-qty-badge">${totalInCart}× no pedido</div>`
-        : '';
+      actionBtn = '';
     } else if (esgotado) {
       actionBtn = `
         <button class="btn-encomendar" onclick="openEncomenda('${escAttr(p.name)}',${p.price != null ? p.price : 'null'})">
@@ -2585,7 +2588,7 @@
       const qty = cart.get(simpleKey).qty;
       const atMax = qty >= p.stock_quantity;
       actionBtn = viewingOrder
-        ? `<div class="card-order-qty-badge">${qty}× no pedido</div>`
+        ? ''
         : `
         <div class="card-qty-ctrl">
           <button onclick="changeQty('${escAttr(simpleKey)}', -1)">−</button>
@@ -2619,9 +2622,12 @@
         </div>`;
     }
 
-    const img = esgotado
-      ? `<div class="card-img-wrap">${imgInner}<div class="card-esgotado-overlay"><span>Esgotado</span></div></div>`
-      : imgInner;
+    const qtyBadge = totalInCart > 0
+      ? `<div class="card-qty-img-badge">${totalInCart}</div>`
+      : '';
+    const img = `<div class="card-img-wrap">${imgInner}${
+      esgotado ? '<div class="card-esgotado-overlay"><span>Esgotado</span></div>' : ''
+    }${qtyBadge}</div>`;
 
     return `
       <div class="card">
