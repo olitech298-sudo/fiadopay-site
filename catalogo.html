@@ -158,6 +158,29 @@
       color: #fff;
       border-color: transparent;
     }
+    .filter-btn-more {
+      background: #f4f2fb;
+      border-style: dashed;
+    }
+    .categories-list {
+      overflow-y: auto;
+      padding: 4px 12px 24px;
+    }
+    .categories-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 14px 10px;
+      border: none;
+      background: none;
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 1px solid #f0eef8;
+      cursor: pointer;
+    }
+    .categories-item:last-child { border-bottom: none; }
+    .categories-item.active { color: #5B3FB5; }
 
     /* ── Grid ── */
     .grid {
@@ -1608,6 +1631,7 @@
 <!-- Overlay e Drawer do carrinho -->
 <div class="toast" id="toast"></div>
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-overlay" id="categoriesOverlay" onclick="closeCategoriesSheet()"></div>
 
 <div class="variant-overlay" id="variantModal" onclick="closeVariantModal(event)">
   <div class="variant-sheet" onclick="event.stopPropagation()">
@@ -1656,6 +1680,15 @@
   </div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer" id="cartFooter"></div>
+</div>
+
+<div class="cart-drawer" id="categoriesDrawer">
+  <div class="cart-handle"></div>
+  <div class="cart-header">
+    <div><h2>Categorias</h2></div>
+    <button class="cart-close" onclick="closeCategoriesSheet()">✕</button>
+  </div>
+  <div class="categories-list" id="categoriesList"></div>
 </div>
 
 <script>
@@ -2318,13 +2351,35 @@
     renderGrid(filtered);
   }
 
+  const MAX_INLINE_FILTERS = 9; // "Todos" + até 8 categorias antes de resumir num botão
+
   function renderFilters(products) {
     const cats = ['Todos', ...new Set(products.map(p => p.category).filter(Boolean))];
     const el = document.getElementById('filters');
-    el.innerHTML = cats.map(c => `
+    const chips = cats.map(c => `
       <button class="filter-btn ${c === activeCategory ? 'active' : ''}"
         onclick="setCategory('${c.replace(/'/g, "\\'")}')">${c}</button>
     `).join('');
+    const moreBtn = cats.length > MAX_INLINE_FILTERS
+      ? `<button class="filter-btn filter-btn-more" onclick="openCategoriesSheet()">☰ Categorias</button>`
+      : '';
+    el.innerHTML = chips + moreBtn;
+  }
+
+  function openCategoriesSheet() {
+    const cats = ['Todos', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
+    const list = document.getElementById('categoriesList');
+    list.innerHTML = cats.map(c => `
+      <button class="categories-item ${c === activeCategory ? 'active' : ''}"
+        onclick="setCategory('${c.replace(/'/g, "\\'")}'); closeCategoriesSheet();">${escHtml(c)}</button>
+    `).join('');
+    document.getElementById('categoriesOverlay').classList.add('open');
+    document.getElementById('categoriesDrawer').classList.add('open');
+  }
+
+  function closeCategoriesSheet() {
+    document.getElementById('categoriesOverlay').classList.remove('open');
+    document.getElementById('categoriesDrawer').classList.remove('open');
   }
 
   function setCategory(cat) {
