@@ -130,38 +130,28 @@
       pointer-events: none;
     }
 
-    /* ── Category filters ── */
-    .filters {
+    /* ── Barra de ordenar / categorias ── */
+    .catalog-toolbar {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 16px 16px 4px;
+      justify-content: space-between;
+      align-items: center;
       max-width: 680px;
       margin: 0 auto;
-      scrollbar-width: none;
+      padding: 16px 16px 4px;
     }
-    .filters::-webkit-scrollbar { display: none; }
-    .filter-btn {
-      white-space: nowrap;
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1.5px solid #c5bde8;
-      background: #fff;
+    .toolbar-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: none;
       color: #5B3FB5;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
+      padding: 6px 4px;
     }
-    .filter-btn.active {
-      background: linear-gradient(135deg, #3B2C8A, #5B3FB5);
-      color: #fff;
-      border-color: transparent;
-    }
-    .filter-btn-more {
-      background: #f4f2fb;
-      border-style: dashed;
-    }
+    .toolbar-btn:active { opacity: 0.65; }
     .categories-list {
       overflow-y: auto;
       padding: 4px 12px 24px;
@@ -1612,7 +1602,16 @@
 </div>
 
 <div id="pedidoBanner"></div>
-<div class="filters" id="filters"></div>
+<div class="catalog-toolbar" id="filters">
+  <button class="toolbar-btn" onclick="toggleSort()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v18M8 21l-4-4M8 21l4-4M16 21V3M16 3l4 4M16 3l-4 4"/></svg>
+    <span id="sortLabel">Ordenar</span>
+  </button>
+  <button class="toolbar-btn" onclick="openCategoriesSheet()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="1.8" fill="currentColor"/><circle cx="15" cy="12" r="1.8" fill="currentColor"/><circle cx="9" cy="18" r="1.8" fill="currentColor"/></svg>
+    <span id="categoriesLabel">Categorias</span>
+  </button>
+</div>
 <div id="main"></div>
 
 <div class="footer">
@@ -2343,27 +2342,29 @@
 
   function applyFilters() {
     const q = normalize(document.getElementById('searchInput').value);
-    const filtered = allProducts.filter(p => {
+    let filtered = allProducts.filter(p => {
       const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
       const matchQ = !q || normalize(p.name).includes(q) || normalize(p.category || '').includes(q);
       return matchCat && matchQ;
     });
+    if (sortMode === 'asc') filtered = [...filtered].sort((a, b) => a.price - b.price);
+    else if (sortMode === 'desc') filtered = [...filtered].sort((a, b) => b.price - a.price);
     renderGrid(filtered);
   }
 
-  const MAX_INLINE_FILTERS = 9; // "Todos" + até 8 categorias antes de resumir num botão
+  let sortMode = 'default'; // 'default' | 'asc' | 'desc'
 
-  function renderFilters(products) {
-    const cats = ['Todos', ...new Set(products.map(p => p.category).filter(Boolean))];
-    const el = document.getElementById('filters');
-    const chips = cats.map(c => `
-      <button class="filter-btn ${c === activeCategory ? 'active' : ''}"
-        onclick="setCategory('${c.replace(/'/g, "\\'")}')">${c}</button>
-    `).join('');
-    const moreBtn = cats.length > MAX_INLINE_FILTERS
-      ? `<button class="filter-btn filter-btn-more" onclick="openCategoriesSheet()">☰ Categorias</button>`
-      : '';
-    el.innerHTML = chips + moreBtn;
+  function toggleSort() {
+    sortMode = sortMode === 'default' ? 'asc' : sortMode === 'asc' ? 'desc' : 'default';
+    updateToolbarLabels();
+    applyFilters();
+  }
+
+  function updateToolbarLabels() {
+    document.getElementById('categoriesLabel').textContent =
+      activeCategory === 'Todos' ? 'Categorias' : activeCategory;
+    document.getElementById('sortLabel').textContent =
+      sortMode === 'asc' ? 'Menor preço' : sortMode === 'desc' ? 'Maior preço' : 'Ordenar';
   }
 
   function openCategoriesSheet() {
@@ -2384,7 +2385,7 @@
 
   function setCategory(cat) {
     activeCategory = cat;
-    renderFilters(allProducts);
+    updateToolbarLabels();
     applyFilters();
   }
 
@@ -2939,7 +2940,7 @@
         allProducts = products;
         document.getElementById('productCount').textContent =
           `${products.length} produto${products.length !== 1 ? 's' : ''}`;
-        renderFilters(products);
+        updateToolbarLabels();
 
         const pedidoParam = params.get('pedido');
         if (pedidoParam) {
