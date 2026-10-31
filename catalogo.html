@@ -283,6 +283,18 @@
       color: #999;
       margin-bottom: 4px;
     }
+    .card-desc {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
     .card-category {
       display: inline-block;
       padding: 2px 8px;
@@ -2706,6 +2718,7 @@
     const code = p.code ? `<div class="card-code">Cód. ${escHtml(p.code)}</div>` : '';
     const cat = p.category ? `<span class="card-category">${escHtml(p.category)}</span>` : '';
     const unit = p.unit ? `<span class="card-unit">${escHtml(p.unit)}</span>` : '';
+    const desc = p.description ? `<div class="card-desc">${escHtml(p.description)}</div>` : '';
     // img será finalizado após calcular esgotado (precisa do overlay)
 
     const hasVariants = p.variants && ((p.variants.sizes && p.variants.sizes.length > 0) || (p.variants.colors && p.variants.colors.length > 0));
@@ -2849,6 +2862,7 @@
         <div class="card-body">
           <div class="card-name">${escHtml(p.name)}</div>
           ${code}
+          ${desc}
           <div>${cat}${unit}</div>
           <div class="card-price">${formatPrice(p.price)}</div>
           ${stockCount}
@@ -2956,9 +2970,15 @@
         document.querySelector('.search-wrap').style.display = 'none';
         document.getElementById('filters').style.display = 'none';
 
-        const match = await supabaseGet(
-          `products?user_id=eq.${userId}&name=ilike.${encodeURIComponent(produtoParam)}&select=name,price,category,code,image_url,images,unit,stock_quantity&limit=1`
-        );
+        const matchQuery = cols =>
+          `products?user_id=eq.${userId}&name=ilike.${encodeURIComponent(produtoParam)}&select=${cols}&limit=1`;
+        const matchCols = 'name,price,category,code,image_url,images,unit,stock_quantity';
+        let match;
+        try {
+          match = await supabaseGet(matchQuery(matchCols + ',description'));
+        } catch (_) {
+          match = await supabaseGet(matchQuery(matchCols));
+        }
         allProducts = match;
 
         document.getElementById('productCount').textContent =
@@ -2972,9 +2992,17 @@
         btn.textContent = '← Ver catálogo completo';
         document.getElementById('main').after(btn);
       } else {
-        const products = await supabaseGet(
-          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=name,price,category,code,image_url,images,color_images,unit,stock_quantity,variants,variant_stock&order=name.asc`
-        );
+        // Se a coluna "description" ainda não estiver liberada no banco, a busca
+        // falha; nesse caso repete sem ela para a loja continuar abrindo.
+        const productsQuery = cols =>
+          `products?user_id=eq.${userId}&catalog_visible=eq.true&select=${cols}&order=name.asc`;
+        const baseCols = 'name,price,category,code,image_url,images,color_images,unit,stock_quantity,variants,variant_stock';
+        let products;
+        try {
+          products = await supabaseGet(productsQuery(baseCols + ',description'));
+        } catch (_) {
+          products = await supabaseGet(productsQuery(baseCols));
+        }
         allProducts = products;
         document.getElementById('productCount').textContent =
           `${products.length} produto${products.length !== 1 ? 's' : ''}`;
